@@ -14,14 +14,140 @@ void Window::onPaint() {
   abcg::glClear(GL_COLOR_BUFFER_BIT);
 }
 
+static void ShowExampleMenuFile();
+
+// Note that shortcuts are currently provided for display only
+// (future version will add explicit flags to BeginMenu() to request processing shortcuts)
+static void ShowExampleMenuFile()
+{
+    ImGui::MenuItem("(demo menu)", NULL, false, false);
+    if (ImGui::MenuItem("New")) {}
+    if (ImGui::MenuItem("Open", "Ctrl+O")) {}
+    if (ImGui::BeginMenu("Open Recent"))
+    {
+        ImGui::MenuItem("fish_hat.c");
+        ImGui::MenuItem("fish_hat.inl");
+        ImGui::MenuItem("fish_hat.h");
+        if (ImGui::BeginMenu("More.."))
+        {
+            ImGui::MenuItem("Hello");
+            ImGui::MenuItem("Sailor");
+            if (ImGui::BeginMenu("Recurse.."))
+            {
+                ShowExampleMenuFile();
+                ImGui::EndMenu();
+            }
+            ImGui::EndMenu();
+        }
+        ImGui::EndMenu();
+    }
+    if (ImGui::MenuItem("Save", "Ctrl+S")) {}
+    if (ImGui::MenuItem("Save As..")) {}
+
+    ImGui::Separator();
+    if (ImGui::BeginMenu("Options"))
+    {
+        static bool enabled = true;
+        ImGui::MenuItem("Enabled", "", &enabled);
+        ImGui::BeginChild("child", ImVec2(0, 60), true);
+        for (int i = 0; i < 10; i++)
+            ImGui::Text("Scrolling Text %d", i);
+        ImGui::EndChild();
+        static float f = 0.5f;
+        static int n = 0;
+        ImGui::SliderFloat("Value", &f, 0.0f, 1.0f);
+        ImGui::InputFloat("Input", &f, 0.1f);
+        ImGui::Combo("Combo", &n, "Yes\0No\0Maybe\0\0");
+        ImGui::EndMenu();
+    }
+
+    if (ImGui::BeginMenu("Colors"))
+    {
+        float sz = ImGui::GetTextLineHeight();
+        for (int i = 0; i < ImGuiCol_COUNT; i++)
+        {
+            const char* name = ImGui::GetStyleColorName((ImGuiCol)i);
+            ImVec2 p = ImGui::GetCursorScreenPos();
+            ImGui::GetWindowDrawList()->AddRectFilled(p, ImVec2(p.x + sz, p.y + sz), ImGui::GetColorU32((ImGuiCol)i));
+            ImGui::Dummy(ImVec2(sz, sz));
+            ImGui::SameLine();
+            ImGui::MenuItem(name);
+        }
+        ImGui::EndMenu();
+    }
+
+    // Here we demonstrate appending again to the "Options" menu (which we already created above)
+    // Of course in this demo it is a little bit silly that this function calls BeginMenu("Options") twice.
+    // In a real code-base using it would make senses to use this feature from very different code locations.
+    if (ImGui::BeginMenu("Options")) // <-- Append!
+    {
+        static bool b = true;
+        ImGui::Checkbox("SomeOption", &b);
+        ImGui::EndMenu();
+    }
+
+    if (ImGui::BeginMenu("Disabled", false)) // Disabled
+    {
+        IM_ASSERT(0);
+    }
+    if (ImGui::MenuItem("Checked", NULL, true)) {}
+    if (ImGui::MenuItem("Quit", "Alt+F4")) {}
+}
+
 void Window::onPaintUI() {
   // Parent class will show fullscreen button and FPS meter
   abcg::OpenGLWindow::onPaintUI();
+    static bool show_app_main_menu_bar = false;
+    static bool show_app_documents = false;
 
+    static bool show_app_console = false;
+    static bool show_app_log = false;
+    static bool show_app_layout = false;
+    static bool show_app_property_editor = false;
+    static bool show_app_long_text = false;
+    static bool show_app_auto_resize = false;
+    static bool show_app_constrained_resize = false;
+    static bool show_app_simple_overlay = false;
+    static bool show_app_fullscreen = false;
+    static bool show_app_window_titles = false;
+    static bool show_app_custom_rendering = false;
+
+    static bool show_app_metrics = false;
+    static bool show_app_stack_tool = false;
+    static bool show_app_style_editor = false;
+    static bool show_app_about = false;
+
+  auto flags1{ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoResize};
   // Our own ImGui widgets go below
   {
     // Window begin
-    ImGui::Begin("Hello, First App!");
+    ImGui::Begin("Hello, First App!", nullptr, flags1);
+
+    bool save{};
+    static bool showCompliment{}; // Hold state
+
+    // Menu Bar
+    if (ImGui::BeginMenuBar()) {
+      // File menu
+      if (ImGui::BeginMenu("File")) {
+        ImGui::MenuItem("Save", nullptr, &save);
+        ImGui::EndMenu();
+      }
+      // View menu
+      if (ImGui::BeginMenu("View")) {
+        ImGui::MenuItem("Show Compliment", nullptr, &showCompliment);
+        ImGui::EndMenu();
+      }
+      ImGui::EndMenuBar();
+    }
+
+    if (save) {
+      // Save file...
+    }
+
+    if (showCompliment) {
+      ImGui::Text("You're a beautiful person.");
+    }
 
     // Static text
     auto const &windowSettings{getWindowSettings()};
@@ -76,30 +202,41 @@ void Window::onPaintUI() {
     auto flags{ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoResize};
     ImGui::Begin("Window with menu", nullptr, flags);
     {
-      bool save{};
-      static bool showCompliment{}; // Hold state
 
       // Menu Bar
       if (ImGui::BeginMenuBar()) {
-        // File menu
-        if (ImGui::BeginMenu("File")) {
-          ImGui::MenuItem("Save", nullptr, &save);
+        if (ImGui::BeginMenu("Menu")) {
+          ShowExampleMenuFile();
           ImGui::EndMenu();
         }
-        // View menu
-        if (ImGui::BeginMenu("View")) {
-          ImGui::MenuItem("Show Compliment", nullptr, &showCompliment);
+        if (ImGui::BeginMenu("Examples")) {
+          ImGui::MenuItem("Main menu bar", NULL, &show_app_main_menu_bar);
+          ImGui::MenuItem("Console", NULL, &show_app_console);
+          ImGui::MenuItem("Log", NULL, &show_app_log);
+          ImGui::MenuItem("Simple layout", NULL, &show_app_layout);
+          ImGui::MenuItem("Property editor", NULL, &show_app_property_editor);
+          ImGui::MenuItem("Long text display", NULL, &show_app_long_text);
+          ImGui::MenuItem("Auto-resizing window", NULL, &show_app_auto_resize);
+          ImGui::MenuItem("Constrained-resizing window", NULL,
+                          &show_app_constrained_resize);
+          ImGui::MenuItem("Simple overlay", NULL, &show_app_simple_overlay);
+          ImGui::MenuItem("Fullscreen window", NULL, &show_app_fullscreen);
+          ImGui::MenuItem("Manipulating window titles", NULL,
+                          &show_app_window_titles);
+          ImGui::MenuItem("Custom rendering", NULL, &show_app_custom_rendering);
+          ImGui::MenuItem("Documents", NULL, &show_app_documents);
+          ImGui::EndMenu();
+        }
+        // if (ImGui::MenuItem("MenuItem")) {} // You can also use MenuItem()
+        // inside a menu bar!
+        if (ImGui::BeginMenu("Tools")) {
+          ImGui::MenuItem("Metrics/Debugger", NULL, &show_app_metrics);
+          ImGui::MenuItem("Stack Tool", NULL, &show_app_stack_tool);
+          ImGui::MenuItem("Style Editor", NULL, &show_app_style_editor);
+          ImGui::MenuItem("About Dear ImGui", NULL, &show_app_about);
           ImGui::EndMenu();
         }
         ImGui::EndMenuBar();
-      }
-
-      if (save) {
-        // Save file...
-      }
-
-      if (showCompliment) {
-        ImGui::Text("You're a beautiful person.");
       }
     }
     ImGui::End();
@@ -116,3 +253,4 @@ void Window::onPaintUI() {
     ImGui::End();
   }
 }
+
