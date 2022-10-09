@@ -161,17 +161,34 @@ void Window::onPaintUI() {
                 auto const offset{(i - 1) * levelSize + (j - 1)};
                 // Button text is ch followed by an ID in the format ##ij
                 auto buttonText{
-                    fmt::format("{}##{}{}", m_board.at(offset), i, j)};
+                    fmt::format("##{}{}", m_board.at(offset), i, j)};
+                char charBoard = m_board.at(offset);
+
+                ImGui::PushID(i * levelSize + j);
+                ImVec4 color;
+                if (charBoard == '1') {
+                  color = {0.0f, 0.0f, 0.0f, 1.0f};
+                } else if (charBoard == '0') {
+                  color = {1.0f, 1.0f, 1.0f, 1.0f};
+                } else {
+                  color = {0.5f, 0.5f, 0.5f, 1.0f};
+                }
+                ImGui::PushStyleColor(ImGuiCol_Button, color);
+                ImGui::PushStyleColor(ImGuiCol_ButtonHovered, color);
+                ImGui::PushStyleColor(ImGuiCol_ButtonActive, color);
+
                 if (ImGui::Button(buttonText.c_str(),
                                   ImVec2(-1, buttonHeight))) {
                   if (m_gameState == GameState::Play) {
-                    m_board.at(offset) =
-                        mark ? m_board.at(offset) == '0' ? ' ' : '1'
-                        : m_board.at(offset) == '1' ? ' '
-                                                    : '0';
+                    m_board.at(offset) = mark ? charBoard == '0' ? ' ' : '1'
+                                         : charBoard == '1' ? ' '
+                                                            : '0';
                     checkEndCondition();
                   }
                 }
+
+                ImGui::PopStyleColor(3);
+                ImGui::PopID();
               }
             }
           }
