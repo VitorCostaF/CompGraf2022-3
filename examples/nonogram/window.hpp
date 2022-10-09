@@ -54,19 +54,21 @@ private:
       '1', '1', '1', '1', '1', '1', '1', '1', '1', '1'};
 
   std::array<char, m_N * m_N> m_board{}; // '\0', 'X' or 'O'
+  std::array<bool, numberLevels> levelsVisible{};
 
-  std::array<bool, 5> levelsPassed{};
   int level;
 
   ImFont *m_font{};
 
   void checkEndCondition();
   void restartGame();
+  void nextLevel();
   void startGame();
   std::string getLabelColumn(int coluna);
   std::string getLabelLine(int linha);
   char getBoardChar(int offset);
   void setBoardChar(int offset, char c);
+  void selectLevel(int level);
 };
 
 #endif

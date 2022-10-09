@@ -22,11 +22,27 @@ void Window::restartGame() {
   m_gameState = GameState::Play;
 }
 
+void Window::nextLevel() {
+  m_board.fill(' ');
+  m_gameState = GameState::Play;
+  level += 1;
+  levelsVisible.at(level) = true;
+  mark = true;
+}
+
 void Window::startGame() {
-  levelsPassed.fill(false);
+  levelsVisible.fill(false);
+  levelsVisible.at(0) = true;
   m_board.fill(' ');
   level = 0;
   mark = true;
+  m_gameState = GameState::Play;
+}
+
+void Window::selectLevel(int levelSelected) {
+  level = levelSelected;
+  mark = true;
+  m_board.fill(' ');
   m_gameState = GameState::Play;
 }
 
@@ -73,9 +89,19 @@ void Window::onPaintUI() {
     // Menu
     {
       bool restartSelected{};
+      std::array<bool, numberLevels> levelsSelected;
       if (ImGui::BeginMenuBar()) {
         if (ImGui::BeginMenu("Game")) {
           ImGui::MenuItem("Restart", nullptr, &restartSelected);
+          ImGui::EndMenu();
+        }
+        if (ImGui::BeginMenu("Levels")) {
+          for (auto i : iter::range(numberLevels)) {
+            if (levelsVisible.at(i)) {
+              ImGui::MenuItem(fmt::format("Level {}", i + 1).c_str(), nullptr,
+                              &levelsSelected[i]);
+            }
+          }
           ImGui::EndMenu();
         }
         ImGui::EndMenuBar();
@@ -83,7 +109,14 @@ void Window::onPaintUI() {
       if (restartSelected) {
         restartGame();
       }
+      for (auto i : iter::range(numberLevels)) {
+        if (levelsSelected.at(i)) {
+          selectLevel(i);
+          break;
+        }
+      }
     }
+
     // Static text showing current turn or win/draw messages
     {
       std::string text;
@@ -165,6 +198,15 @@ void Window::onPaintUI() {
       if (ImGui::Button("Restart game", ImVec2(-1, 50))) {
         restartGame();
         mark = true;
+      }
+    }
+    {
+      if (m_gameState == GameState::Win) {
+        if (ImGui::Button(fmt::format("Level {}", level + 2).c_str(),
+                          ImVec2(-1, 50))) {
+          nextLevel();
+          mark = true;
+        }
       }
     }
 
