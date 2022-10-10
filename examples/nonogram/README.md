@@ -1,0 +1,6 @@
+A presente atividade consiste no jogo nonogram ou logic pix. Para maiores detalhes consulte https://pt.wikipedia.org/wiki/Logic_Pix. A ideia do jogo basicamente é formar a figura descrita pelos números ao lado e em cima da imagem. Os número representam os quadrados e quantos devem ser seguidos. Por exemplo se temos um 5 em uma coluna significa que teremos 5 quadrados pretos seguidos. Se tivermos um 1 e 2 teremos um quadrado preto com um ou mais brancos seguidos de 2 pretos. 
+
+O Jogo se inicia com a chamada da função startGame(), que inicia o m_board, variável que representa o tabuleiro, com brancos e coloca o estado do jogo Play.
+Na onPaintUI temos a criação do menu com o item game, que possui a opção de restart do nível, e o outro item levels, que possui os levels liberados par o jogador escolher. Um level é liberado se o jogador passou por ele.
+
+Logo depois temos a montagem do tabuleiro. O tamanho do tabuleiro é definido pela vetor levelsSize. Esse vetor guarda o tamanho do tabuleiro de cada level. Na primeira linha e coluna não temos botões mas sim labels dos números de preenchimento

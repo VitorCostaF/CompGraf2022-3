@@ -19,6 +19,7 @@ void Window::onCreate() {
 
 void Window::restartGame() {
   m_board.fill(' ');
+  mark = true;
   m_gameState = GameState::Play;
 }
 
@@ -90,6 +91,8 @@ void Window::onPaintUI() {
     {
       bool restartSelected{};
       std::array<bool, numberLevels> levelsSelected;
+      levelsSelected.fill(false);
+      levelsSelected.at(1) = false;
       if (ImGui::BeginMenuBar()) {
         if (ImGui::BeginMenu("Game")) {
           ImGui::MenuItem("Restart", nullptr, &restartSelected);
@@ -160,11 +163,10 @@ void Window::onPaintUI() {
               } else {
                 auto const offset{(i - 1) * levelSize + (j - 1)};
                 // Button text is ch followed by an ID in the format ##ij
-                auto buttonText{
-                    fmt::format("##{}{}", m_board.at(offset), i, j)};
                 char charBoard = m_board.at(offset);
+                auto buttonText{fmt::format("##{}{}", (i - 1), (j - 1))};
 
-                ImGui::PushID(i * levelSize + j);
+                ImGui::PushID((i - 1) * levelSize + (j - 1));
                 ImVec4 color;
                 if (charBoard == '1') {
                   color = {0.0f, 0.0f, 0.0f, 1.0f};
@@ -199,20 +201,48 @@ void Window::onPaintUI() {
       ImGui::PopFont();
     }
 
+    ImVec4 colorMark;
+    ImVec4 colorUnmark;
+    if (mark) {
+      colorMark = {0.0f, 0.0f, 0.0f, 0.0f};
+      colorUnmark = {0.5f, 0.5f, 0.5f, 1.0f};
+    } else {
+      colorMark = {0.5f, 0.5f, 0.5f, 1.0f};
+      colorUnmark = {0.0f, 0.0f, 0.0f, 1.0f};
+    }
+
     ImGui::Spacing();
     // "Restart game" button
     {
-      if (ImGui::Button("Mark", ImVec2(100, 50))) {
-        mark = true;
+      {
+        ImGui::PushID(1);
+        ImGui::PushStyleColor(ImGuiCol_Button, colorMark);
+        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, colorMark);
+        ImGui::PushStyleColor(ImGuiCol_ButtonActive, colorMark);
+        if (ImGui::Button("Mark", ImVec2(100, 50))) {
+          mark = true;
+        }
+        ImGui::PopStyleColor(3);
+        ImGui::PopID();
       }
+
       ImGui::SameLine();
-      if (ImGui::Button("Unmark", ImVec2(100, 50))) {
-        mark = false;
+      {
+        ImGui::PushID(1);
+        ImGui::PushStyleColor(ImGuiCol_Button, colorUnmark);
+        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, colorUnmark);
+        ImGui::PushStyleColor(ImGuiCol_ButtonActive, colorUnmark);
+        if (ImGui::Button("Unmark", ImVec2(100, 50))) {
+          mark = false;
+        }
+        ImGui::PopStyleColor(3);
+        ImGui::PopID();
       }
     }
     ImGui::Spacing();
     {
       if (ImGui::Button("Restart game", ImVec2(-1, 50))) {
+
         restartGame();
         mark = true;
       }

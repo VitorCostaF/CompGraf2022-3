@@ -17,8 +17,6 @@ private:
   enum class GameState { Play, Win };
   GameState m_gameState;
 
-  bool m_XsTurn{true};
-
   // static constexpr std::array<int, numberLevels> levelsSize{10, 10, 10, 15,
   // 15};
   static constexpr std::array<int, numberLevels> levelsSize{5, 10};
