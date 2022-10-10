@@ -203,7 +203,7 @@ void Window::onPaintUI() {
     ImVec4 colorMark;
     ImVec4 colorUnmark;
     if (mark) {
-      colorMark = {0.0f, 0.0f, 0.0f, 0.0f};
+      colorMark = {0.0f, 0.0f, 0.0f, 1.0f};
       colorUnmark = {0.5f, 0.5f, 0.5f, 1.0f};
     } else {
       colorMark = {0.5f, 0.5f, 0.5f, 1.0f};
@@ -227,7 +227,7 @@ void Window::onPaintUI() {
 
       ImGui::SameLine();
       {
-        ImGui::PushID(1);
+        ImGui::PushID(2);
         ImGui::PushStyleColor(ImGuiCol_Button, colorUnmark);
         ImGui::PushStyleColor(ImGuiCol_ButtonHovered, colorUnmark);
         ImGui::PushStyleColor(ImGuiCol_ButtonActive, colorUnmark);

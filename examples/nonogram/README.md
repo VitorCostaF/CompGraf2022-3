@@ -3,4 +3,4 @@ A presente atividade consiste no jogo nonogram ou logic pix. Para maiores detalh
 O Jogo se inicia com a chamada da função startGame(), que inicia o m_board, variável que representa o tabuleiro, com brancos e coloca o estado do jogo Play.
 Na onPaintUI temos a criação do menu com o item game, que possui a opção de restart do nível, e o outro item levels, que possui os levels liberados par o jogador escolher. Um level é liberado se o jogador passou por ele.
 
-Logo depois temos a montagem do tabuleiro. O tamanho do tabuleiro é definido pela vetor levelsSize. Esse vetor guarda o tamanho do tabuleiro de cada level. Na primeira linha e coluna não temos botões mas sim labels dos números de preenchimento
+Logo depois temos a montagem do tabuleiro. O tamanho do tabuleiro é definido pela vetor levelsSize. Esse vetor guarda o tamanho do tabuleiro de cada level. Na primeira linha e coluna não temos botões mas sim labels dos números de preenchimento. Nos botões incluimos a cor preta 
