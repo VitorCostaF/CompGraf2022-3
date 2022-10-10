@@ -4,3 +4,7 @@ O Jogo se inicia com a chamada da função startGame(), que inicia o m_board, va
 Na onPaintUI temos a criação do menu com o item game, que possui a opção de restart do nível, e o outro item levels, que possui os levels liberados par o jogador escolher. Um level é liberado se o jogador passou por ele.
 
 Logo depois temos a montagem do tabuleiro. O tamanho do tabuleiro é definido pela vetor levelsSize. Esse vetor guarda o tamanho do tabuleiro de cada level. Na primeira linha e coluna não temos botões mas sim labels dos números de preenchimento. Ao clicar em Mark podemos marcar clicar os botões para marca-los com a cor preta para formar o desenho indicado pelos números e no botão Unmark para pintar os botões de branco, para formar as separações. 
+
+No tabuleiro m_board fica marcado com 0, 1 ou ' ' (espaço) para indicar se o campo foi marcado ou não. Mais abaixo temos os botões de reset, mark e unmark. Sempre que um botão é pressionado é chamada a função para checar o fim do jogo. Basicamente uma função lambda é usada para conferir se a string formada pela concatenação de m_board é igual a string gabarito do level atual. Foram criadas funções auxiliares para checar qual tabuleiro gabarito usar dado que seria feita uma melhoria para usar vector, porém não foi possível fazer a tempo. 
+
+Quando um level é passado um novo botão aparece indicando que o próximo level está livre. Isso chama a função de próximo level. 
