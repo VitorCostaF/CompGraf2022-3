@@ -92,7 +92,6 @@ void Window::onPaintUI() {
       bool restartSelected{};
       std::array<bool, numberLevels> levelsSelected;
       levelsSelected.fill(false);
-      levelsSelected.at(1) = false;
       if (ImGui::BeginMenuBar()) {
         if (ImGui::BeginMenu("Game")) {
           ImGui::MenuItem("Restart", nullptr, &restartSelected);
