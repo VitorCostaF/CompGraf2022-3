@@ -1,4 +1,6 @@
 # add_subdirectory(helloworld)
 # add_subdirectory(firstapp)
 # add_subdirectory(tictactoe)
-add_subdirectory(nonogram)
+# add_subdirectory(nonogram)
+add_subdirectory(sierpinski)
+# add_subdirectory(asteroids)
