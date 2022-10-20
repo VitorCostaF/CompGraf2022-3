@@ -2,5 +2,6 @@
 # add_subdirectory(firstapp)
 # add_subdirectory(tictactoe)
 # add_subdirectory(nonogram)
-add_subdirectory(sierpinski)
-# add_subdirectory(asteroids)
+# add_subdirectory(sierpinski)
+add_subdirectory(asteroids)
+#add_subdirectory(flapbird)
