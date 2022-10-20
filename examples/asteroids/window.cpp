@@ -17,6 +17,13 @@ void Window::onCreate() {
                                  {.source = assetsPath + "objects.frag",
                                   .stage = abcg::ShaderStage::Fragment}});
 
+  // Create program to render the stars
+  m_starsProgram =
+      abcg::createOpenGLProgram({{.source = assetsPath + "stars.vert",
+                                  .stage = abcg::ShaderStage::Vertex},
+                                 {.source = assetsPath + "stars.frag",
+                                  .stage = abcg::ShaderStage::Fragment}});
+
   abcg::glClearColor(0, 0, 0, 1);
 
 #if !defined(__EMSCRIPTEN__)
@@ -30,11 +37,41 @@ void Window::onCreate() {
   restart();
 }
 
+void Window::restart() {
+  m_gameData.m_state = State::Playing;
+
+  m_starLayers.create(m_starsProgram, 25);
+  m_ship.create(m_objectsProgram);
+}
+
+void Window::onUpdate() {
+  auto const deltaTime{gsl::narrow_cast<float>(getDeltaTime())};
+
+  // Wait 5 seconds before restarting
+  if (m_gameData.m_state != State::Playing &&
+      m_restartWaitTimer.elapsed() > 5) {
+    restart();
+    return;
+  }
+
+  m_ship.update(m_gameData, deltaTime);
+  m_starLayers.update(m_ship, deltaTime);
+}
+
 void Window::onPaint() {
   abcg::glClear(GL_COLOR_BUFFER_BIT);
   abcg::glViewport(0, 0, m_viewportSize.x, m_viewportSize.y);
 
+  m_starLayers.paint();
   m_ship.paint(m_gameData);
+}
+
+void Window::onDestroy() {
+  abcg::glDeleteProgram(m_starsProgram);
+  abcg::glDeleteProgram(m_objectsProgram);
+
+  m_ship.destroy();
+  m_starLayers.destroy();
 }
 
 void Window::onPaintUI() {
@@ -67,12 +104,6 @@ void Window::onResize(glm::ivec2 const &size) {
   m_viewportSize = size;
 
   abcg::glClear(GL_COLOR_BUFFER_BIT);
-}
-
-void Window::onDestroy() {
-  abcg::glDeleteProgram(m_objectsProgram);
-
-  m_ship.destroy();
 }
 
 void Window::onEvent(SDL_Event const &event) {
@@ -124,23 +155,4 @@ void Window::onEvent(SDL_Event const &event) {
 
     m_ship.m_rotation = std::atan2(direction.y, direction.x) - M_PI_2;
   }
-}
-
-void Window::restart() {
-  m_gameData.m_state = State::Playing;
-
-  m_ship.create(m_objectsProgram);
-}
-
-void Window::onUpdate() {
-  auto const deltaTime{gsl::narrow_cast<float>(getDeltaTime())};
-
-  // Wait 5 seconds before restarting
-  if (m_gameData.m_state != State::Playing &&
-      m_restartWaitTimer.elapsed() > 5) {
-    restart();
-    return;
-  }
-
-  m_ship.update(m_gameData, deltaTime);
 }

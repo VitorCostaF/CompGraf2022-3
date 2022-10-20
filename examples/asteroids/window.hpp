@@ -23,11 +23,13 @@ protected:
 private:
   glm::ivec2 m_viewportSize{};
 
+  GLuint m_starsProgram{};
   GLuint m_objectsProgram{};
 
   GameData m_gameData;
 
   Ship m_ship;
+  StarLayers m_starLayers;
 
   abcg::Timer m_restartWaitTimer;
 
