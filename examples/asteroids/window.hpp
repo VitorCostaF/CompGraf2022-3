@@ -28,6 +28,7 @@ private:
 
   GameData m_gameData;
 
+  Asteroids m_asteroids;
   Ship m_ship;
   StarLayers m_starLayers;
 

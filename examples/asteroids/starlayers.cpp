@@ -71,8 +71,8 @@ void StarLayers::paint() {
     abcg::glBindVertexArray(layer.m_VAO);
     abcg::glUniform1f(m_pointSizeLoc, layer.m_pointSize);
 
-    for (auto const i : {-0, 0, 0}) {
-      for (auto const j : {-0, 0, 0}) {
+    for (auto const i : {-2, 0, 2}) {
+      for (auto const j : {-2, 0, 2}) {
         abcg::glUniform2f(m_translationLoc, layer.m_translation.x + j,
                           layer.m_translation.y + i);
 

@@ -42,6 +42,7 @@ void Window::restart() {
 
   m_starLayers.create(m_starsProgram, 25);
   m_ship.create(m_objectsProgram);
+  m_asteroids.create(m_objectsProgram, 3);
 }
 
 void Window::onUpdate() {
@@ -56,6 +57,7 @@ void Window::onUpdate() {
 
   m_ship.update(m_gameData, deltaTime);
   m_starLayers.update(m_ship, deltaTime);
+  m_asteroids.update(m_ship, deltaTime);
 }
 
 void Window::onPaint() {
@@ -63,6 +65,7 @@ void Window::onPaint() {
   abcg::glViewport(0, 0, m_viewportSize.x, m_viewportSize.y);
 
   m_starLayers.paint();
+  m_asteroids.paint();
   m_ship.paint(m_gameData);
 }
 
@@ -70,6 +73,7 @@ void Window::onDestroy() {
   abcg::glDeleteProgram(m_starsProgram);
   abcg::glDeleteProgram(m_objectsProgram);
 
+  m_asteroids.destroy();
   m_ship.destroy();
   m_starLayers.destroy();
 }
