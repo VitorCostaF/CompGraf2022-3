@@ -34,7 +34,8 @@ void Window::onPaint() {
   abcg::glClear(GL_COLOR_BUFFER_BIT);
   abcg::glViewport(0, 0, m_viewportSize.x, m_viewportSize.y);
 
-  m_ship.paint(m_gameData);
+  m_pipes.paint();
+  m_bird.paint(m_gameData);
 }
 
 void Window::onPaintUI() {
@@ -72,7 +73,8 @@ void Window::onResize(glm::ivec2 const &size) {
 void Window::onDestroy() {
   abcg::glDeleteProgram(m_objectsProgram);
 
-  m_ship.destroy();
+  m_pipes.destroy();
+  m_bird.destroy();
 }
 
 void Window::onEvent(SDL_Event const &event) {
@@ -122,14 +124,15 @@ void Window::onEvent(SDL_Event const &event) {
     glm::vec2 direction{mousePosition.x - m_viewportSize.x / 2,
                         -(mousePosition.y - m_viewportSize.y / 2)};
 
-    m_ship.m_rotation = std::atan2(direction.y, direction.x) - M_PI_2;
+    m_bird.m_rotation = std::atan2(direction.y, direction.x) - M_PI_2;
   }
 }
 
 void Window::restart() {
   m_gameData.m_state = State::Playing;
 
-  m_ship.create(m_objectsProgram);
+  m_bird.create(m_objectsProgram);
+  m_pipes.create(m_objectsProgram, 3);
 }
 
 void Window::onUpdate() {
@@ -142,5 +145,6 @@ void Window::onUpdate() {
     return;
   }
 
-  m_ship.update(m_gameData, deltaTime);
+  m_bird.update(m_gameData, deltaTime);
+  m_pipes.update(m_bird, deltaTime);
 }

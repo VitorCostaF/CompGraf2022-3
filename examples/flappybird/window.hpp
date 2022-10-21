@@ -5,10 +5,8 @@
 
 #include "abcgOpenGL.hpp"
 
-#include "asteroids.hpp"
-#include "bullets.hpp"
-#include "ship.hpp"
-#include "starlayers.hpp"
+#include "bird.hpp"
+#include "pipes.hpp"
 
 class Window : public abcg::OpenGLWindow {
 protected:
@@ -27,7 +25,8 @@ private:
 
   GameData m_gameData;
 
-  Ship m_ship;
+  Pipes m_pipes;
+  Bird m_bird;
 
   abcg::Timer m_restartWaitTimer;
 
