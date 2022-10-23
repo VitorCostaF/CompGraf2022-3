@@ -132,7 +132,7 @@ void Window::restart() {
   m_gameData.m_state = State::Playing;
 
   m_bird.create(m_objectsProgram);
-  m_pipes.create(m_objectsProgram, 3);
+  m_pipes.create(m_objectsProgram);
 }
 
 void Window::onUpdate() {
@@ -146,5 +146,5 @@ void Window::onUpdate() {
   }
 
   m_bird.update(m_gameData, deltaTime);
-  m_pipes.update(m_bird, deltaTime);
+  m_pipes.update(deltaTime);
 }
