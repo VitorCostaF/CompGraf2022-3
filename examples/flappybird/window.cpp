@@ -1,4 +1,5 @@
 #include "window.hpp"
+#include "core.h"
 
 void Window::onCreate() {
   auto const assetsPath{abcg::Application::getAssetsPath()};
@@ -15,6 +16,12 @@ void Window::onCreate() {
       abcg::createOpenGLProgram({{.source = assetsPath + "objects.vert",
                                   .stage = abcg::ShaderStage::Vertex},
                                  {.source = assetsPath + "objects.frag",
+                                  .stage = abcg::ShaderStage::Fragment}});
+
+  pipeProgram =
+      abcg::createOpenGLProgram({{.source = assetsPath + "pipes.vert",
+                                  .stage = abcg::ShaderStage::Vertex},
+                                 {.source = assetsPath + "pipes.frag",
                                   .stage = abcg::ShaderStage::Fragment}});
 
   abcg::glClearColor(0, 0, 0, 1);
@@ -72,6 +79,7 @@ void Window::onResize(glm::ivec2 const &size) {
 
 void Window::onDestroy() {
   abcg::glDeleteProgram(m_objectsProgram);
+  abcg::glDeleteProgram(pipeProgram);
 
   m_pipes.destroy();
   m_bird.destroy();
@@ -132,7 +140,7 @@ void Window::restart() {
   m_gameData.m_state = State::Playing;
 
   m_bird.create(m_objectsProgram);
-  m_pipes.create(m_objectsProgram);
+  m_pipes.create(pipeProgram);
 }
 
 void Window::onUpdate() {

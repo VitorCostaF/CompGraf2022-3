@@ -16,6 +16,7 @@ public:
   void paint();
   void destroy();
   void update(float deltaTime);
+  GLuint pipeProgram{};
 
   struct Pipe {
     GLuint m_VAO{};
@@ -26,15 +27,15 @@ public:
     float m_scale{1};
     float m_rotation{0};
     glm::vec2 m_translation{0.1f};
-    glm::vec2 m_velocity{0.1f, 0.0f};
+    glm::vec2 m_velocity{-0.1f, 0.0f};
 
     std::array<glm::vec2, 2> basePoints{};
     std::array<glm::vec2, 2> centralPoints{};
   };
 
   float centralPointAux{0};
-  std::array<Pipe, 3> supPipes;
-  std::array<Pipe, 3> infPipes;
+  std::array<Pipe, 3> supPipes{};
+  std::array<Pipe, 3> infPipes{};
 
   bool pipePrint{true};
 

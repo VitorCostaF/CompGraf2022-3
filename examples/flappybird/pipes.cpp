@@ -17,8 +17,8 @@ void Pipes::create(GLuint program) {
   // Get location of uniforms in the program
   m_colorLoc = abcg::glGetUniformLocation(m_program, "color");
   m_translationLoc = abcg::glGetUniformLocation(m_program, "translation");
-  m_rotationLoc = abcg::glGetUniformLocation(m_program, "rotation");
-  m_scaleLoc = abcg::glGetUniformLocation(m_program, "scale");
+  // m_rotationLoc = abcg::glGetUniformLocation(m_program, "rotation");
+  // m_scaleLoc = abcg::glGetUniformLocation(m_program, "scale");
 
   // Create Pipes
 
@@ -26,42 +26,6 @@ void Pipes::create(GLuint program) {
     supPipes.at(i) = makePipe(true, i);
 
     infPipes.at(i) = makePipe(false, i);
-  }
-  if (pipePrint) {
-    pipePrint = false;
-    for (auto i : iter::range(3)) {
-      Pipe pipe = supPipes.at(i);
-      fmt::print("supPipe {} base 1 x: {} \n", i, pipe.basePoints.at(0).x);
-      fmt::print("supPipe {} base 1 y: {} \n", i, pipe.basePoints.at(0).y);
-      fmt::print("supPipe {} base 2 x: {} \n", i, pipe.basePoints.at(1).x);
-      fmt::print("supPipe {} base 2 y: {} \n", i, pipe.basePoints.at(1).y);
-      fmt::print("supPipe {} central 1 x: {} \n", i,
-                 pipe.centralPoints.at(0).x);
-      fmt::print("supPipe {} central 1 y: {} \n", i,
-                 pipe.centralPoints.at(0).y);
-      fmt::print("supPipe {} central 2 x: {} \n", i,
-                 pipe.centralPoints.at(1).x);
-      fmt::print("supPipe {} central 2 y: {} \n", i,
-                 pipe.centralPoints.at(1).y);
-      fmt::print("supPipe {} color: {} \n", i, pipe.m_color.r);
-    }
-
-    for (auto i : iter::range(3)) {
-      Pipe pipe = infPipes.at(i);
-      fmt::print("infPipe {} base 1 x: {} \n", i, pipe.basePoints.at(0).x);
-      fmt::print("infPipe {} base 1 y: {} \n", i, pipe.basePoints.at(0).y);
-      fmt::print("infPipe {} base 2 x: {} \n", i, pipe.basePoints.at(1).x);
-      fmt::print("infPipe {} base 2 y: {} \n", i, pipe.basePoints.at(1).y);
-      fmt::print("infPipe {} central 1 x: {} \n", i,
-                 pipe.centralPoints.at(0).x);
-      fmt::print("infPipe {} central 1 y: {} \n", i,
-                 pipe.centralPoints.at(0).y);
-      fmt::print("infPipe {} central 2 x: {} \n", i,
-                 pipe.centralPoints.at(1).x);
-      fmt::print("infPipe {} central 2 y: {} \n", i,
-                 pipe.centralPoints.at(1).y);
-      fmt::print("infPipe {} color: {} \n", i, pipe.m_color.r);
-    }
   }
 }
 
@@ -76,8 +40,8 @@ void Pipes::paint() {
       abcg::glBindVertexArray(pipe.m_VAO);
 
       abcg::glUniform4fv(m_colorLoc, 1, &pipe.m_color.r);
-      abcg::glUniform1f(m_scaleLoc, pipe.m_scale);
-      abcg::glUniform1f(m_rotationLoc, pipe.m_rotation);
+      // abcg::glUniform1f(m_scaleLoc, pipe.m_scale);
+      // abcg::glUniform1f(m_rotationLoc, pipe.m_rotation);
       abcg::glUniform2f(m_translationLoc, pipe.m_translation.x,
                         pipe.m_translation.y);
 
@@ -99,16 +63,34 @@ void Pipes::destroy() {
 }
 
 void Pipes::update(float deltaTime) {
-  std::vector<Pipe> pipes{};
-  for (auto &pipe : {supPipes, infPipes}) {
-    for (auto i : iter::range(3)) {
-      pipes.push_back(pipe.at(i));
-    }
+  // std::vector<Pipe> pipes{};
+  // for (auto &pipe : {supPipes, infPipes}) {
+  //   for (auto i : iter::range(3)) {
+  //     pipes.push_back(pipe.at(i));
+  //   }
+  // }
+
+  // for (auto &pipe : supPipes) {
+  //   for (auto i : iter::range(3)) {
+  //     pipes.push_back(pipe.at(i));
+  //   }
+  // }
+
+  for (auto &pipe : supPipes) {
+    pipe.m_translation += pipe.m_velocity * deltaTime;
+    // Wrap-around
+    if (pipe.m_translation.x < -1.0f)
+      pipe.m_translation.x += 2.0f;
+    if (pipe.m_translation.x > +1.0f)
+      pipe.m_translation.x -= 2.0f;
+    if (pipe.m_translation.y < -1.0f)
+      pipe.m_translation.y += 2.0f;
+    if (pipe.m_translation.y > +1.0f)
+      pipe.m_translation.y -= 2.0f;
   }
 
-  for (auto &pipe : pipes) {
+  for (auto &pipe : infPipes) {
     pipe.m_translation += pipe.m_velocity * deltaTime;
-
     // Wrap-around
     if (pipe.m_translation.x < -1.0f)
       pipe.m_translation.x += 2.0f;
