@@ -3,6 +3,7 @@
 #include "range.hpp"
 
 #include <array>
+#include <glm/fwd.hpp>
 #include <glm/gtx/fast_trigonometry.hpp>
 #include <vector>
 
@@ -27,6 +28,8 @@ void Pipes::create(GLuint program) {
 
     infPipes.at(i) = makePipe(false, i, 1);
   }
+
+  makeFloor();
 }
 
 void Pipes::paint() {
@@ -49,6 +52,11 @@ void Pipes::paint() {
       abcg::glBindVertexArray(0);
     }
   }
+  abcg::glBindVertexArray(m_VAO);
+  abcg::glUniform4fv(m_colorLoc, 1, &m_color.r);
+  abcg::glUniform2f(m_translationLoc, m_translation.x, m_translation.y);
+  abcg::glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+  abcg::glBindVertexArray(0);
 
   abcg::glUseProgram(0);
 }
@@ -122,6 +130,34 @@ void Pipes::update(float deltaTime) {
   // }
 }
 
+void Pipes::makeFloor() {
+  // Generate VBO
+  abcg::glGenBuffers(1, &m_VBO);
+  abcg::glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
+  abcg::glBufferData(GL_ARRAY_BUFFER, floorPoints.size() * sizeof(glm::vec2),
+                     floorPoints.data(), GL_STATIC_DRAW);
+  abcg::glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+  // Get location of attributes in the program
+  auto const positionAttribute{
+      abcg::glGetAttribLocation(m_program, "inPosition")};
+
+  // Create VAO
+  abcg::glGenVertexArrays(1, &m_VAO);
+
+  // Bind vertex attributes to current VAO
+  abcg::glBindVertexArray(m_VAO);
+
+  abcg::glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
+  abcg::glEnableVertexAttribArray(positionAttribute);
+  abcg::glVertexAttribPointer(positionAttribute, 2, GL_FLOAT, GL_FALSE, 0,
+                              nullptr);
+  abcg::glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+  // End of binding to current VAO
+  abcg::glBindVertexArray(0);
+}
+
 Pipes::Pipe Pipes::makePipe(bool isSup, int index, float windowShift,
                             glm::vec2 translation, float scale) {
   Pipe pipe;
@@ -132,7 +168,7 @@ Pipes::Pipe Pipes::makePipe(bool isSup, int index, float windowShift,
   std::uniform_int_distribution randomSides(6, 20);
 
   // Get a random color (actually, a grayscale)
-  std::uniform_real_distribution randomIntensity(-0.6f, 0.9f);
+  std::uniform_real_distribution randomIntensity(-1.0f + pipeGap + 0.1f, 0.9f);
   // pipe.m_color = glm::vec4(randomIntensity(re));
 
   pipe.m_color.a = 1.0f;
