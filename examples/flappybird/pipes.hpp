@@ -26,8 +26,9 @@ public:
     bool m_hit{};
     float m_scale{1};
     float m_rotation{0};
+    int pipeIndex{};
     glm::vec2 m_translation{0.1f};
-    glm::vec2 m_velocity{-0.1f, 0.0f};
+    glm::vec2 m_velocity{-0.5f, 0.0f};
 
     std::array<glm::vec2, 2> basePoints{};
     std::array<glm::vec2, 2> centralPoints{};
@@ -39,9 +40,11 @@ public:
 
   bool pipePrint{true};
 
-  Pipe makePipe(bool isSup, int index, glm::vec2 translation = {},
-                float scale = 1.0f);
+  Pipe makePipe(bool isSup, int index, float windowShift,
+                glm::vec2 translation = {}, float scale = 1.0f);
   float pipeWidth{0.2f};
+  float pipeDistance{1.0f};
+  float pipeGap{0.4f};
 
 private:
   GLuint m_program{};

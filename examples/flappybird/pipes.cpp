@@ -23,9 +23,9 @@ void Pipes::create(GLuint program) {
   // Create Pipes
 
   for (auto i : iter::range(3)) {
-    supPipes.at(i) = makePipe(true, i);
+    supPipes.at(i) = makePipe(true, i, 1);
 
-    infPipes.at(i) = makePipe(false, i);
+    infPipes.at(i) = makePipe(false, i, 1);
   }
 }
 
@@ -76,35 +76,54 @@ void Pipes::update(float deltaTime) {
   //   }
   // }
 
-  for (auto &pipe : supPipes) {
+  for (auto i : iter::range(3)) {
+    auto &pipe = supPipes.at(i);
     pipe.m_translation += pipe.m_velocity * deltaTime;
-    // Wrap-around
-    if (pipe.m_translation.x < -1.0f)
-      pipe.m_translation.x += 2.0f;
-    if (pipe.m_translation.x > +1.0f)
-      pipe.m_translation.x -= 2.0f;
-    if (pipe.m_translation.y < -1.0f)
-      pipe.m_translation.y += 2.0f;
-    if (pipe.m_translation.y > +1.0f)
-      pipe.m_translation.y -= 2.0f;
+    if (pipe.m_translation.x + pipe.basePoints.at(1).x < -1.0f) {
+      supPipes.at(i) = makePipe(true, 1, 1 - pipeWidth);
+    }
   }
 
-  for (auto &pipe : infPipes) {
+  for (auto i : iter::range(3)) {
+    auto &pipe = infPipes.at(i);
     pipe.m_translation += pipe.m_velocity * deltaTime;
-    // Wrap-around
-    if (pipe.m_translation.x < -1.0f)
-      pipe.m_translation.x += 2.0f;
-    if (pipe.m_translation.x > +1.0f)
-      pipe.m_translation.x -= 2.0f;
-    if (pipe.m_translation.y < -1.0f)
-      pipe.m_translation.y += 2.0f;
-    if (pipe.m_translation.y > +1.0f)
-      pipe.m_translation.y -= 2.0f;
+    if (pipe.m_translation.x + pipe.basePoints.at(1).x < -1.0f) {
+      infPipes.at(i) = makePipe(false, 1, 1 - pipeWidth);
+    }
   }
+  // for (auto &pipe : supPipes) {
+  //   pipe.m_translation += pipe.m_velocity * deltaTime;
+  //   // Wrap-around
+  //   if (pipe.m_translation.x + pipe.basePoints.at(1).x < -1.0f) {
+  //     pipe.m_translation.x += 2.0f;
+  //     makePipe(true, 1);
+  //     supPipes.at(i)
+  //   }
+
+  //   if (pipe.m_translation.x > +1.0f)
+  //     pipe.m_translation.x -= 2.0f;
+  //   if (pipe.m_translation.y < -1.0f)
+  //     pipe.m_translation.y += 2.0f;
+  //   if (pipe.m_translation.y > +1.0f)
+  //     pipe.m_translation.y -= 2.0f;
+  // }
+
+  // for (auto &pipe : infPipes) {
+  //   pipe.m_translation += pipe.m_velocity * deltaTime;
+  //   // Wrap-around
+  //   if (pipe.m_translation.x < -1.0f)
+  //     pipe.m_translation.x += 2.0f;
+  //   if (pipe.m_translation.x > +1.0f)
+  //     pipe.m_translation.x -= 2.0f;
+  //   if (pipe.m_translation.y < -1.0f)
+  //     pipe.m_translation.y += 2.0f;
+  //   if (pipe.m_translation.y > +1.0f)
+  //     pipe.m_translation.y -= 2.0f;
+  // }
 }
 
-Pipes::Pipe Pipes::makePipe(bool isSup, int index, glm::vec2 translation,
-                            float scale) {
+Pipes::Pipe Pipes::makePipe(bool isSup, int index, float windowShift,
+                            glm::vec2 translation, float scale) {
   Pipe pipe;
 
   auto &re{m_randomEngine}; // Shortcut
@@ -119,8 +138,9 @@ Pipes::Pipe Pipes::makePipe(bool isSup, int index, glm::vec2 translation,
   pipe.m_color.a = 1.0f;
   pipe.m_scale = scale;
   pipe.m_translation = translation;
+  pipe.pipeIndex = index;
 
-  float firstXBasePoint = index * 0.5f + 0.7f;
+  float firstXBasePoint = index * pipeDistance + windowShift;
 
   glm::vec2 firstBasePoint;
   glm::vec2 secondBasePoint;
@@ -130,7 +150,7 @@ Pipes::Pipe Pipes::makePipe(bool isSup, int index, glm::vec2 translation,
 
   firstBasePoint = glm::vec2{firstXBasePoint, -0.8f};
 
-  firstCentralPoint = glm::vec2{firstXBasePoint, centralPointAux - 0.1f};
+  firstCentralPoint = glm::vec2{firstXBasePoint, centralPointAux - pipeGap};
 
   if (isSup) {
     centralPointAux = randomIntensity(re);
