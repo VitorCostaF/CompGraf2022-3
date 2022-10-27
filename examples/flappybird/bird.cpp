@@ -1,4 +1,5 @@
 #include "bird.hpp"
+#include "core.h"
 
 #include <glm/gtx/fast_trigonometry.hpp>
 #include <glm/gtx/rotate_vector.hpp>
@@ -116,6 +117,8 @@ void Bird::paint(const GameData &gameData) {
   abcg::glUniform1f(m_scaleLoc, m_scale);
   abcg::glUniform1f(m_rotationLoc, m_rotation);
   abcg::glUniform2fv(m_translationLoc, 1, &m_translation.x);
+  // abcg::glUniform2f(m_translationLoc, m_translation.x,
+  //                       m_translation.y);
 
   // Restart thruster blink timer every 100 ms
   // if (m_trailBlinkTimer.elapsed() > 100.0 / 1000.0) m_trailBlinkTimer.restart();
@@ -150,17 +153,19 @@ void Bird::destroy() {
 }
 
 void Bird::update(GameData const &gameData, float deltaTime) {
-  // Rotate
-  // if (gameData.m_input[gsl::narrow<size_t>(Input::Left)])
-  //   m_rotation = glm::wrapAngle(m_rotation + 4.0f * deltaTime);
-  // if (gameData.m_input[gsl::narrow<size_t>(Input::Right)])
-  //   m_rotation = glm::wrapAngle(m_rotation - 4.0f * deltaTime);
-
   // Apply thrust
   if (gameData.m_input[gsl::narrow<size_t>(Input::Up)] &&
-      gameData.m_state == State::Playing) {
+      gameData.m_state == State::Playing && buttonReleased) {
     // Thrust in the forward vector
     // auto const forward{glm::rotate(glm::vec2{0.0f, 1.0f}, m_rotation)};
-    m_velocity += glm::vec2{0.0f, 1.0f} * deltaTime;
+    glm::vec2 teste = glm::vec2{0.0f, impulse};
+    m_velocity += teste;
+    m_translation += m_velocity;
+    buttonReleased = false;
+  } else {
+    m_velocity += glm::vec2{0.0f, gravity} * deltaTime;
+    m_translation += m_velocity; 
   }
+  
+  
 }

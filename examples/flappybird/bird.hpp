@@ -15,11 +15,15 @@ public:
   glm::vec4 m_color{1};
   float m_rotation{};
   float m_scale{0.125f};
+  float gravity{-0.0005f};
+  float impulse{0.0005f};
   glm::vec2 m_translation{};
   glm::vec2 m_velocity{};
 
   abcg::Timer m_trailBlinkTimer;
   abcg::Timer m_bulletCoolDownTimer;
+
+  bool buttonReleased{true};
 
 private:
   GLuint m_program{};

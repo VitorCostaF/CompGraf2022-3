@@ -18,8 +18,6 @@ void Pipes::create(GLuint program) {
   // Get location of uniforms in the program
   m_colorLoc = abcg::glGetUniformLocation(m_program, "color");
   m_translationLoc = abcg::glGetUniformLocation(m_program, "translation");
-  // m_rotationLoc = abcg::glGetUniformLocation(m_program, "rotation");
-  // m_scaleLoc = abcg::glGetUniformLocation(m_program, "scale");
 
   // Create Pipes
 
@@ -43,8 +41,6 @@ void Pipes::paint() {
       abcg::glBindVertexArray(pipe.m_VAO);
 
       abcg::glUniform4fv(m_colorLoc, 1, &pipe.m_color.r);
-      // abcg::glUniform1f(m_scaleLoc, pipe.m_scale);
-      // abcg::glUniform1f(m_rotationLoc, pipe.m_rotation);
       abcg::glUniform2f(m_translationLoc, pipe.m_translation.x,
                         pipe.m_translation.y);
 
@@ -71,18 +67,6 @@ void Pipes::destroy() {
 }
 
 void Pipes::update(float deltaTime) {
-  // std::vector<Pipe> pipes{};
-  // for (auto &pipe : {supPipes, infPipes}) {
-  //   for (auto i : iter::range(3)) {
-  //     pipes.push_back(pipe.at(i));
-  //   }
-  // }
-
-  // for (auto &pipe : supPipes) {
-  //   for (auto i : iter::range(3)) {
-  //     pipes.push_back(pipe.at(i));
-  //   }
-  // }
 
   for (auto i : iter::range(3)) {
     auto &pipe = supPipes.at(i);
@@ -99,35 +83,6 @@ void Pipes::update(float deltaTime) {
       infPipes.at(i) = makePipe(false, 1, 1 - pipeWidth);
     }
   }
-  // for (auto &pipe : supPipes) {
-  //   pipe.m_translation += pipe.m_velocity * deltaTime;
-  //   // Wrap-around
-  //   if (pipe.m_translation.x + pipe.basePoints.at(1).x < -1.0f) {
-  //     pipe.m_translation.x += 2.0f;
-  //     makePipe(true, 1);
-  //     supPipes.at(i)
-  //   }
-
-  //   if (pipe.m_translation.x > +1.0f)
-  //     pipe.m_translation.x -= 2.0f;
-  //   if (pipe.m_translation.y < -1.0f)
-  //     pipe.m_translation.y += 2.0f;
-  //   if (pipe.m_translation.y > +1.0f)
-  //     pipe.m_translation.y -= 2.0f;
-  // }
-
-  // for (auto &pipe : infPipes) {
-  //   pipe.m_translation += pipe.m_velocity * deltaTime;
-  //   // Wrap-around
-  //   if (pipe.m_translation.x < -1.0f)
-  //     pipe.m_translation.x += 2.0f;
-  //   if (pipe.m_translation.x > +1.0f)
-  //     pipe.m_translation.x -= 2.0f;
-  //   if (pipe.m_translation.y < -1.0f)
-  //     pipe.m_translation.y += 2.0f;
-  //   if (pipe.m_translation.y > +1.0f)
-  //     pipe.m_translation.y -= 2.0f;
-  // }
 }
 
 void Pipes::makeFloor() {
