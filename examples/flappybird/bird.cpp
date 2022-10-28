@@ -170,9 +170,8 @@ void Bird::update(GameData const &gameData, float deltaTime) {
     m_velocity += glm::vec2{0.0f, gravity} * deltaTime;
     m_translation += m_velocity; 
   }
-  
 }
 
-bool Bird::checkCeilColision (){
+bool Bird::checkCeilColision () {
   return m_translation.y > 0.9f; 
 }

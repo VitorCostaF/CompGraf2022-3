@@ -56,7 +56,7 @@ public:
 
   float pipeWidth{0.2f};
   float pipeDistance{1.0f};
-  float pipeGap{0.4f};
+  float pipeGap{0.6f};
 
   glm::vec4 m_color{1};
   glm::vec2 m_translation{0};

@@ -31,6 +31,7 @@ private:
 
   abcg::Timer m_restartWaitTimer;
 
+  int points{};
   ImFont *m_font{};
 
   std::default_random_engine m_randomEngine;
