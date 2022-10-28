@@ -1,6 +1,7 @@
 #include "window.hpp"
 #include "core.h"
 #include "range.hpp"
+#include <SDL_keycode.h>
 
 void Window::onCreate() {
   auto const assetsPath{abcg::Application::getAssetsPath()};
@@ -50,7 +51,7 @@ void Window::onPaintUI() {
   abcg::OpenGLWindow::onPaintUI();
 
   {
-    auto const size{ImVec2(300, 85)};
+    auto const size{ImVec2(350, 150)};
     auto const position{ImVec2((m_viewportSize.x - size.x) / 2.0f,
                                (m_viewportSize.y - size.y) / 2.0f)};
     ImGui::SetNextWindowPos(position);
@@ -63,8 +64,7 @@ void Window::onPaintUI() {
 
     if (m_gameData.m_state == State::GameOver) {
       ImGui::Text("Game Over!");
-    } else if (m_gameData.m_state == State::Win) {
-      ImGui::Text("*You Win!*");
+      ImGui::Text("Press Enter");
     }
 
     ImGui::PopFont();
@@ -96,7 +96,13 @@ void Window::onEvent(SDL_Event const &event) {
         m_gameData.m_input.reset(gsl::narrow<size_t>(Input::Up));
       }
     }
+    if (event.key.keysym.sym == SDLK_RETURN) {
+      if (m_gameData.m_state == State::GameOver) {
+        m_gameData.m_state = State::Restarted;
+      }
+    }
   }
+
   if (event.type == SDL_KEYUP) {
     if (event.key.keysym.sym == SDLK_UP || event.key.keysym.sym == SDLK_w) {
       m_gameData.m_input.reset(gsl::narrow<size_t>(Input::Up));
@@ -104,19 +110,6 @@ void Window::onEvent(SDL_Event const &event) {
     }
   }
 
-  // Mouse events
-  if (event.type == SDL_MOUSEBUTTONDOWN) {
-    if (event.button.button == SDL_BUTTON_LEFT)
-      m_gameData.m_input.set(gsl::narrow<size_t>(Input::Fire));
-    if (event.button.button == SDL_BUTTON_RIGHT)
-      m_gameData.m_input.set(gsl::narrow<size_t>(Input::Up));
-  }
-  if (event.type == SDL_MOUSEBUTTONUP) {
-    if (event.button.button == SDL_BUTTON_LEFT)
-      m_gameData.m_input.reset(gsl::narrow<size_t>(Input::Fire));
-    if (event.button.button == SDL_BUTTON_RIGHT)
-      m_gameData.m_input.reset(gsl::narrow<size_t>(Input::Up));
-  }
   if (event.type == SDL_MOUSEMOTION) {
     glm::ivec2 mousePosition;
     SDL_GetMouseState(&mousePosition.x, &mousePosition.y);
@@ -140,10 +133,12 @@ void Window::onUpdate() {
   auto const deltaTime{gsl::narrow_cast<float>(getDeltaTime())};
 
   // Wait 5 seconds before restarting
-  if (m_gameData.m_state != State::Playing &&
-      m_restartWaitTimer.elapsed() > 5) {
-    restart();
+  if (m_gameData.m_state == State::GameOver) {
     return;
+  }
+
+  if (m_gameData.m_state == State::Restarted) {
+    restart();
   }
 
   m_bird.update(m_gameData, deltaTime);
