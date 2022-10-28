@@ -146,4 +146,7 @@ void Window::onUpdate() {
 
   m_bird.update(m_gameData, deltaTime);
   m_pipes.update(deltaTime);
+  checkColisions();
 }
+
+void Window::checkColisions() {}

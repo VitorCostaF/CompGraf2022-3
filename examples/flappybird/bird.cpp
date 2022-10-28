@@ -154,18 +154,25 @@ void Bird::destroy() {
 
 void Bird::update(GameData const &gameData, float deltaTime) {
   // Apply thrust
+  
   if (gameData.m_input[gsl::narrow<size_t>(Input::Up)] &&
-      gameData.m_state == State::Playing && buttonReleased) {
-    // Thrust in the forward vector
-    // auto const forward{glm::rotate(glm::vec2{0.0f, 1.0f}, m_rotation)};
+      gameData.m_state == State::Playing && buttonReleased && !checkCeilColision()) {
+    
     glm::vec2 teste = glm::vec2{0.0f, impulse};
     m_velocity += teste;
     m_translation += m_velocity;
     buttonReleased = false;
+    
   } else {
+    if(checkCeilColision()) {
+      m_velocity = glm::vec2{0.0f, 0.0f};
+    }
     m_velocity += glm::vec2{0.0f, gravity} * deltaTime;
     m_translation += m_velocity; 
   }
   
-  
+}
+
+bool Bird::checkCeilColision (){
+  return m_translation.y > 0.9f; 
 }

@@ -38,6 +38,9 @@ private:
   bool released{true};
 
   void restart();
+
+  void checkColisions();
+  void checkCeilColision();
 };
 
 #endif

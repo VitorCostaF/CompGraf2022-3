@@ -37,9 +37,14 @@ public:
   float centralPointAux{0};
   std::array<Pipe, 3> supPipes{};
   std::array<Pipe, 3> infPipes{};
+
   std::array<glm::vec2, 4> floorPoints{
-      glm::vec2{-1.1, -1.1f}, glm::vec2{1, -1.1f}, glm::vec2{-1.1f, -0.90},
-      glm::vec2{1, -0.90}};
+      glm::vec2{-1.0, -1.0f}, glm::vec2{1, -1.0f}, glm::vec2{-1.0f, -0.80},
+      glm::vec2{1, -0.80}};
+
+  std::array<glm::vec2, 4> ceilPoints{
+      glm::vec2{-1.0f, 1.0f}, glm::vec2{1, 1.0f}, glm::vec2{-1.0f, 1.1f},
+      glm::vec2{1, 1.1f}};
 
   bool pipePrint{true};
 
@@ -47,13 +52,14 @@ public:
                 glm::vec2 translation = {}, float scale = 1.0f);
 
   void makeFloor();
+  void makeCeil();
 
   float pipeWidth{0.2f};
   float pipeDistance{1.0f};
   float pipeGap{0.4f};
 
   glm::vec4 m_color{1};
-  glm::vec2 m_translation{0.1f};
+  glm::vec2 m_translation{0};
 
 private:
   GLuint m_program{};
@@ -62,8 +68,11 @@ private:
   GLint m_translationLoc{};
   GLint m_scaleLoc{};
 
-  GLuint m_VAO{};
-  GLuint m_VBO{};
+  GLuint m_VAOFloor{};
+  GLuint m_VBOFloor{};
+
+  GLuint m_VAOCeil{};
+  GLuint m_VBOCeil{};
 
   std::default_random_engine m_randomEngine;
   std::uniform_real_distribution<float> m_randomDist{-1.0f, 1.0f};

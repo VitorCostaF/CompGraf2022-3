@@ -11,6 +11,7 @@ public:
   void paint(GameData const &gameData);
   void destroy();
   void update(GameData const &gameData, float deltaTime);
+  bool checkCeilColision();
 
   glm::vec4 m_color{1};
   float m_rotation{};
