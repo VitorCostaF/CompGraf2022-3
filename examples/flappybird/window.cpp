@@ -50,8 +50,8 @@ void Window::onPaint() {
 void Window::onPaintUI() {
   abcg::OpenGLWindow::onPaintUI();
 
-  {
-    auto const size{ImVec2(350, 150)};
+  if (m_gameData.m_state == State::GameOver) {
+    auto const size{ImVec2(350, 300)};
     auto const position{ImVec2((m_viewportSize.x - size.x) / 2.0f,
                                (m_viewportSize.y - size.y) / 2.0f)};
     ImGui::SetNextWindowPos(position);
@@ -61,11 +61,24 @@ void Window::onPaintUI() {
                                  ImGuiWindowFlags_NoInputs};
     ImGui::Begin(" ", nullptr, flags);
     ImGui::PushFont(m_font);
-
     if (m_gameData.m_state == State::GameOver) {
       ImGui::Text("Game Over!");
       ImGui::Text("Press Enter");
     }
+
+    ImGui::PopFont();
+    ImGui::End();
+  } else {
+    auto const size{ImVec2(350, 300)};
+    auto const position{ImVec2((m_viewportSize.x) / 2.0f, -1)};
+    ImGui::SetNextWindowPos(position);
+    ImGui::SetNextWindowSize(size);
+    ImGuiWindowFlags const flags{ImGuiWindowFlags_NoBackground |
+                                 ImGuiWindowFlags_NoTitleBar |
+                                 ImGuiWindowFlags_NoInputs};
+    ImGui::Begin(" ", nullptr, flags);
+    ImGui::PushFont(m_font);
+    ImGui::Text("%d", points);
 
     ImGui::PopFont();
     ImGui::End();
