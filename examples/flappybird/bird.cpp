@@ -35,19 +35,6 @@ void Bird::create(GLuint program) {
       glm::vec2{-12.5f, +10.5f}, glm::vec2{-12.5f, +04.0f},
       glm::vec2{-09.5f, +04.0f}, glm::vec2{-09.5f, +10.5f}//,
 
-      // // Cannon (right)
-      // glm::vec2{+09.5f, +10.5f}, glm::vec2{+09.5f, +04.0f},
-      // glm::vec2{+12.5f, +04.0f}, glm::vec2{+12.5f, +10.5f},
-      
-      // // Thruster trail (left)
-      // glm::vec2{-12.0f, -07.5f}, 
-      // glm::vec2{-09.5f, -18.0f}, 
-      // glm::vec2{-07.0f, -07.5f},
-
-      // // Thruster trail (right)
-      // glm::vec2{+07.0f, -07.5f}, 
-      // glm::vec2{+09.5f, -18.0f}, 
-      // glm::vec2{+12.0f, -07.5f},
       };
 
   // Normalize
@@ -63,16 +50,7 @@ void Bird::create(GLuint program) {
                            9, 5, 6,
                            9, 6, 8,
                            8, 6, 7//,
-                          //  // Cannons
-                          //  10, 11, 12,
-                          //  10, 12, 13,
-                          //  14, 15, 16,
-                          //  14, 16, 17,
-                          //  // Thruster trails
-                          //  18, 19, 20,
-                          //  21, 22, 23
-                           };
-  // clang-format on                           
+                           };                          
 
   // Generate VBO
   abcg::glGenBuffers(1, &m_VBO);
@@ -140,8 +118,7 @@ void Bird::update(GameData const &gameData, float deltaTime) {
   if (gameData.m_input[gsl::narrow<size_t>(Input::Up)] &&
       gameData.m_state == State::Playing && buttonReleased && !checkCeilColision()) {
     
-    glm::vec2 teste = glm::vec2{0.0f, impulse};
-    m_velocity += teste;
+    m_velocity += glm::vec2{0.0f, impulse};
     m_translation += m_velocity;
     buttonReleased = false;
     
