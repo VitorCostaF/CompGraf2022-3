@@ -165,7 +165,7 @@ void Window::checkColisions() {
   }
 
   for (auto i : iter::range(3)) {
-    auto infPipe = m_pipes.infPipes.at(i);
+    Pipes::Pipe *infPipe = &m_pipes.infPipes.at(i);
     auto supPipe = m_pipes.supPipes.at(i);
     if (m_bird.m_translation.y < -0.9) {
       m_gameData.m_state = State::GameOver;
@@ -175,9 +175,11 @@ void Window::checkColisions() {
     if (supPipe.basePoints.at(0).x + supPipe.m_translation.x - 0.1f < 0 &&
         supPipe.basePoints.at(1).x + supPipe.m_translation.x + 0.1f > 0) {
       if (supPipe.centralPoints.at(0).y - 0.1f > m_bird.m_translation.y &&
-          infPipe.centralPoints.at(0).y + 0.1f < m_bird.m_translation.y) {
-        points++;
-
+          (*infPipe).centralPoints.at(0).y + 0.1f < m_bird.m_translation.y) {
+        if (!(*infPipe).pipePassed) {
+          points++;
+          (*infPipe).pipePassed = true;
+        }
       } else {
         m_gameData.m_state = State::GameOver;
       }

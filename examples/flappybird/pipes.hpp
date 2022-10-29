@@ -27,6 +27,7 @@ public:
     float m_scale{1};
     float m_rotation{0};
     int pipeIndex{};
+    bool pipePassed{false};
     glm::vec2 m_translation{0.1f};
     glm::vec2 m_velocity{-0.5f, 0.0f};
 
@@ -58,7 +59,7 @@ public:
   float pipeDistance{1.0f};
   float pipeGap{0.6f};
 
-  glm::vec4 m_color{0.28, 0.42, 0.21, 1};
+  glm::vec4 m_color{0.45, 0.25, 0.19, 1};
   glm::vec2 m_translation{0};
 
 private:
