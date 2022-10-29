@@ -64,6 +64,7 @@ void Window::onPaintUI() {
     if (m_gameData.m_state == State::GameOver) {
       ImGui::Text("Game Over!");
       ImGui::Text("Press Enter");
+      ImGui::Text("%d", points);
     }
 
     ImGui::PopFont();
