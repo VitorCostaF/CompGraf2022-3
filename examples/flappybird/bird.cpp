@@ -20,6 +20,11 @@ void Bird::create(GLuint program) {
   m_translation = glm::vec2(0);
   m_velocity = glm::vec2(0);
 
+#if defined(__EMSCRIPTEN__)
+  gravity = -0.05f;
+  impulse = 0.03f;
+#endif
+
   buttonReleased = true;
 
   // clang-format off
@@ -50,7 +55,8 @@ void Bird::create(GLuint program) {
                            9, 5, 6,
                            9, 6, 8,
                            8, 6, 7//,
-                           };                          
+                           };
+  // clang-format on                           
 
   // Generate VBO
   abcg::glGenBuffers(1, &m_VBO);
