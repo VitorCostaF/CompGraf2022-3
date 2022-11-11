@@ -10,7 +10,8 @@ template <> struct std::hash<Vertex> {
   }
 };
 
-void Model::createBuffers() {
+void Model::createBuffers(std::vector<Vertex> *m_vertices,
+                          std::vector<GLuint> *m_indices) {
   // Delete previous buffers
   abcg::glDeleteBuffers(1, &m_EBO);
   abcg::glDeleteBuffers(1, &m_VBO);
@@ -19,20 +20,21 @@ void Model::createBuffers() {
   abcg::glGenBuffers(1, &m_VBO);
   abcg::glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
   abcg::glBufferData(GL_ARRAY_BUFFER,
-                     sizeof(m_vertices.at(0)) * m_vertices.size(),
-                     m_vertices.data(), GL_STATIC_DRAW);
+                     sizeof((*m_vertices).at(0)) * (*m_vertices).size(),
+                     (*m_vertices).data(), GL_STATIC_DRAW);
   abcg::glBindBuffer(GL_ARRAY_BUFFER, 0);
 
   // EBO
   abcg::glGenBuffers(1, &m_EBO);
   abcg::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_EBO);
   abcg::glBufferData(GL_ELEMENT_ARRAY_BUFFER,
-                     sizeof(m_indices.at(0)) * m_indices.size(),
-                     m_indices.data(), GL_STATIC_DRAW);
+                     sizeof((*m_indices).at(0)) * (*m_indices).size(),
+                     (*m_indices).data(), GL_STATIC_DRAW);
   abcg::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
-void Model::loadObj(std::string_view path, bool standardize) {
+void Model::loadObj(std::string_view path, std::vector<Vertex> *m_vertices,
+                    std::vector<GLuint> *m_indices, bool standardize) {
   tinyobj::ObjReader reader;
 
   if (!reader.ParseFromFile(path.data())) {
@@ -50,8 +52,8 @@ void Model::loadObj(std::string_view path, bool standardize) {
   auto const &attrib{reader.GetAttrib()};
   auto const &shapes{reader.GetShapes()};
 
-  m_vertices.clear();
-  m_indices.clear();
+  (*m_vertices).clear();
+  (*m_indices).clear();
 
   // A key:value map with key=Vertex and value=index
   std::unordered_map<Vertex, GLuint> hash{};
@@ -74,26 +76,26 @@ void Model::loadObj(std::string_view path, bool standardize) {
       // If hash doesn't contain this vertex
       if (!hash.contains(vertex)) {
         // Add this index (size of m_vertices)
-        hash[vertex] = m_vertices.size();
+        hash[vertex] = (*m_vertices).size();
         // Add this vertex
-        m_vertices.push_back(vertex);
+        (*m_vertices).push_back(vertex);
       }
 
-      m_indices.push_back(hash[vertex]);
+      (*m_indices).push_back(hash[vertex]);
     }
   }
 
   if (standardize) {
-    Model::standardize();
+    Model::standardize(m_vertices);
   }
 
-  createBuffers();
+  createBuffers(m_vertices, m_indices);
 }
 
-void Model::render(int numTriangles) const {
+void Model::render(std::vector<GLuint> *m_indices, int numTriangles) const {
   abcg::glBindVertexArray(m_VAO);
 
-  auto const numIndices{(numTriangles < 0) ? m_indices.size()
+  auto const numIndices{(numTriangles < 0) ? (*m_indices).size()
                                            : numTriangles * 3};
 
   abcg::glDrawElements(GL_TRIANGLES, numIndices, GL_UNSIGNED_INT, nullptr);
@@ -127,13 +129,13 @@ void Model::setupVAO(GLuint program) {
   abcg::glBindVertexArray(0);
 }
 
-void Model::standardize() {
+void Model::standardize(std::vector<Vertex> *m_vertices) {
   // Center to origin and normalize largest bound to [-1, 1]
 
   // Get bounds
   glm::vec3 max(std::numeric_limits<float>::lowest());
   glm::vec3 min(std::numeric_limits<float>::max());
-  for (auto const &vertex : m_vertices) {
+  for (auto const &vertex : (*m_vertices)) {
     max = glm::max(max, vertex.position);
     min = glm::min(min, vertex.position);
   }
@@ -141,7 +143,7 @@ void Model::standardize() {
   // Center and scale
   auto const center{(min + max) / 2.0f};
   auto const scaling{2.0f / glm::length(max - min)};
-  for (auto &vertex : m_vertices) {
+  for (auto &vertex : (*m_vertices)) {
     vertex.position = (vertex.position - center) * scaling;
   }
 }

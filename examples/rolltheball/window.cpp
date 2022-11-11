@@ -1,4 +1,5 @@
 #include "window.hpp"
+#include "core.h"
 
 #include <unordered_map>
 
@@ -63,8 +64,11 @@ void Window::onCreate() {
 
   m_ground.create(m_program);
 
-  m_model.loadObj(assetsPath + "geosphere.obj");
+  m_model.loadObj(assetsPath + "geosphere.obj", &ball.m_vertices,
+                  &ball.m_indices);
   m_model.setupVAO(m_program);
+
+  // fmt::print("{}", ball.m_vertices.at(0).position.y);
 
   // Get location of uniform variables
   m_viewMatrixLocation = abcg::glGetUniformLocation(m_program, "viewMatrix");
@@ -94,7 +98,7 @@ void Window::onPaint() {
 
   abcg::glUniformMatrix4fv(m_modelMatrixLocation, 1, GL_FALSE, &model[0][0]);
   abcg::glUniform4f(m_colorLocation, 1.0f, 1.0f, 1.0f, 1.0f);
-  m_model.render();
+  m_model.render(&ball.m_indices);
   // Draw ground
   m_ground.paint();
 
