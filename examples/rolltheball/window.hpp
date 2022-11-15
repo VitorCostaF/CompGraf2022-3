@@ -7,6 +7,7 @@
 #include "camera.hpp"
 #include "ground.hpp"
 #include "model.hpp"
+#include "wall.hpp"
 
 class Window : public abcg::OpenGLWindow {
 protected:
@@ -39,6 +40,7 @@ private:
   Ground m_ground;
   Model m_model;
   Ball ball;
+  Wall wall;
 
   std::vector<Vertex> m_vertices;
   std::vector<GLuint> m_indices;

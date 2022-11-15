@@ -66,7 +66,13 @@ void Window::onCreate() {
 
   m_model.loadObj(assetsPath + "geosphere.obj", &ball.m_vertices,
                   &ball.m_indices, &ball.m_VBO, &ball.m_EBO);
+
   m_model.setupVAO(m_program, &ball.m_VBO, &ball.m_EBO, &ball.m_VAO);
+
+  m_model.loadObj(assetsPath + "rectangle.obj", &wall.m_vertices,
+                  &wall.m_indices, &wall.m_VBO, &wall.m_EBO);
+
+  m_model.setupVAO(m_program, &wall.m_VBO, &wall.m_EBO, &wall.m_VAO);
 
   // fmt::print("{}", ball.m_vertices.at(0).position.y);
 
@@ -99,6 +105,45 @@ void Window::onPaint() {
   abcg::glUniformMatrix4fv(m_modelMatrixLocation, 1, GL_FALSE, &model[0][0]);
   abcg::glUniform4f(m_colorLocation, 1.0f, 1.0f, 1.0f, 1.0f);
   m_model.render(&ball.m_indices, &ball.m_VAO);
+
+  // South wall
+  model = glm::mat4(1.0);
+  model = glm::translate(model, glm::vec3{0.0f, 0.2f, 0.925f});
+
+  abcg::glUniformMatrix4fv(m_modelMatrixLocation, 1, GL_FALSE, &model[0][0]);
+  abcg::glUniform4f(m_colorLocation, 1.0f, 0.8f, 0.0f, 1.0f);
+
+  m_model.render(&wall.m_indices, &wall.m_VAO);
+
+  // North wall
+  model = glm::mat4(1.0);
+  model = glm::translate(model, glm::vec3{0.0f, 0.2f, -0.925f});
+
+  abcg::glUniformMatrix4fv(m_modelMatrixLocation, 1, GL_FALSE, &model[0][0]);
+  abcg::glUniform4f(m_colorLocation, 1.0f, 0.8f, 0.0f, 1.0f);
+
+  m_model.render(&wall.m_indices, &wall.m_VAO);
+
+  // East Wall
+  model = glm::mat4(1.0);
+  model = glm::translate(model, glm::vec3{0.925f, 0.2f, 0.0f});
+  model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(0, 1, 0));
+
+  abcg::glUniformMatrix4fv(m_modelMatrixLocation, 1, GL_FALSE, &model[0][0]);
+  abcg::glUniform4f(m_colorLocation, 1.0f, 0.8f, 0.0f, 1.0f);
+
+  m_model.render(&wall.m_indices, &wall.m_VAO);
+
+  // West Wall
+  model = glm::mat4(1.0);
+  model = glm::translate(model, glm::vec3{-0.925f, 0.2f, 0.0f});
+  model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(0, 1, 0));
+
+  abcg::glUniformMatrix4fv(m_modelMatrixLocation, 1, GL_FALSE, &model[0][0]);
+  abcg::glUniform4f(m_colorLocation, 1.0f, 0.8f, 0.0f, 1.0f);
+
+  m_model.render(&wall.m_indices, &wall.m_VAO);
+
   // Draw ground
   m_ground.paint();
 
