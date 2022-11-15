@@ -65,8 +65,8 @@ void Window::onCreate() {
   m_ground.create(m_program);
 
   m_model.loadObj(assetsPath + "geosphere.obj", &ball.m_vertices,
-                  &ball.m_indices);
-  m_model.setupVAO(m_program);
+                  &ball.m_indices, &ball.m_VBO, &ball.m_EBO);
+  m_model.setupVAO(m_program, &ball.m_VBO, &ball.m_EBO, &ball.m_VAO);
 
   // fmt::print("{}", ball.m_vertices.at(0).position.y);
 
@@ -98,7 +98,7 @@ void Window::onPaint() {
 
   abcg::glUniformMatrix4fv(m_modelMatrixLocation, 1, GL_FALSE, &model[0][0]);
   abcg::glUniform4f(m_colorLocation, 1.0f, 1.0f, 1.0f, 1.0f);
-  m_model.render(&ball.m_indices);
+  m_model.render(&ball.m_indices, &ball.m_VAO);
   // Draw ground
   m_ground.paint();
 

@@ -12,18 +12,21 @@ struct Vertex {
 class Model {
 public:
   void loadObj(std::string_view path, std::vector<Vertex> *m_vertices,
-               std::vector<GLuint> *m_indices, bool standardize = true);
-  void render(std::vector<GLuint> *m_indices, int numTriangles = -1) const;
-  void setupVAO(GLuint program);
-  void destroy() const;
+               std::vector<GLuint> *m_indices, GLuint *m_VBO, GLuint *m_EBO,
+               bool standardize = true);
+
+  void render(std::vector<GLuint> *m_indices, GLuint *m_VAO,
+              int numTriangles = -1) const;
+
+  void setupVAO(GLuint program, GLuint *m_VBO, GLuint *m_EBO, GLuint *m_VAO);
+
+  void destroy(GLuint *m_VBO, GLuint *m_EBO, GLuint *m_VAO) const;
 
 private:
-  GLuint m_VAO{};
-  GLuint m_VBO{};
-  GLuint m_EBO{};
-
   void createBuffers(std::vector<Vertex> *m_vertices,
-                     std::vector<GLuint> *m_indices);
+                     std::vector<GLuint> *m_indices, GLuint *m_VBO,
+                     GLuint *m_EBO);
+
   void standardize(std::vector<Vertex> *m_vertices);
 };
 

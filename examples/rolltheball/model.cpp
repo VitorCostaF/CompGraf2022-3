@@ -11,22 +11,23 @@ template <> struct std::hash<Vertex> {
 };
 
 void Model::createBuffers(std::vector<Vertex> *m_vertices,
-                          std::vector<GLuint> *m_indices) {
+                          std::vector<GLuint> *m_indices, GLuint *m_VBO,
+                          GLuint *m_EBO) {
   // Delete previous buffers
-  abcg::glDeleteBuffers(1, &m_EBO);
-  abcg::glDeleteBuffers(1, &m_VBO);
+  abcg::glDeleteBuffers(1, m_EBO);
+  abcg::glDeleteBuffers(1, m_VBO);
 
   // VBO
-  abcg::glGenBuffers(1, &m_VBO);
-  abcg::glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
+  abcg::glGenBuffers(1, m_VBO);
+  abcg::glBindBuffer(GL_ARRAY_BUFFER, *m_VBO);
   abcg::glBufferData(GL_ARRAY_BUFFER,
                      sizeof((*m_vertices).at(0)) * (*m_vertices).size(),
                      (*m_vertices).data(), GL_STATIC_DRAW);
   abcg::glBindBuffer(GL_ARRAY_BUFFER, 0);
 
   // EBO
-  abcg::glGenBuffers(1, &m_EBO);
-  abcg::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_EBO);
+  abcg::glGenBuffers(1, m_EBO);
+  abcg::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, *m_EBO);
   abcg::glBufferData(GL_ELEMENT_ARRAY_BUFFER,
                      sizeof((*m_indices).at(0)) * (*m_indices).size(),
                      (*m_indices).data(), GL_STATIC_DRAW);
@@ -34,7 +35,8 @@ void Model::createBuffers(std::vector<Vertex> *m_vertices,
 }
 
 void Model::loadObj(std::string_view path, std::vector<Vertex> *m_vertices,
-                    std::vector<GLuint> *m_indices, bool standardize) {
+                    std::vector<GLuint> *m_indices, GLuint *m_VBO,
+                    GLuint *m_EBO, bool standardize) {
   tinyobj::ObjReader reader;
 
   if (!reader.ParseFromFile(path.data())) {
@@ -89,11 +91,12 @@ void Model::loadObj(std::string_view path, std::vector<Vertex> *m_vertices,
     Model::standardize(m_vertices);
   }
 
-  createBuffers(m_vertices, m_indices);
+  createBuffers(m_vertices, m_indices, m_VBO, m_EBO);
 }
 
-void Model::render(std::vector<GLuint> *m_indices, int numTriangles) const {
-  abcg::glBindVertexArray(m_VAO);
+void Model::render(std::vector<GLuint> *m_indices, GLuint *m_VAO,
+                   int numTriangles) const {
+  abcg::glBindVertexArray(*m_VAO);
 
   auto const numIndices{(numTriangles < 0) ? (*m_indices).size()
                                            : numTriangles * 3};
@@ -103,17 +106,18 @@ void Model::render(std::vector<GLuint> *m_indices, int numTriangles) const {
   abcg::glBindVertexArray(0);
 }
 
-void Model::setupVAO(GLuint program) {
+void Model::setupVAO(GLuint program, GLuint *m_VBO, GLuint *m_EBO,
+                     GLuint *m_VAO) {
   // Release previous VAO
-  abcg::glDeleteVertexArrays(1, &m_VAO);
+  abcg::glDeleteVertexArrays(1, m_VAO);
 
   // Create VAO
-  abcg::glGenVertexArrays(1, &m_VAO);
-  abcg::glBindVertexArray(m_VAO);
+  abcg::glGenVertexArrays(1, m_VAO);
+  abcg::glBindVertexArray(*m_VAO);
 
   // Bind EBO and VBO
-  abcg::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_EBO);
-  abcg::glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
+  abcg::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, *m_EBO);
+  abcg::glBindBuffer(GL_ARRAY_BUFFER, *m_VBO);
 
   // Bind vertex attributes
   auto const positionAttribute{
@@ -148,8 +152,8 @@ void Model::standardize(std::vector<Vertex> *m_vertices) {
   }
 }
 
-void Model::destroy() const {
-  abcg::glDeleteBuffers(1, &m_EBO);
-  abcg::glDeleteBuffers(1, &m_VBO);
-  abcg::glDeleteVertexArrays(1, &m_VAO);
+void Model::destroy(GLuint *m_VBO, GLuint *m_EBO, GLuint *m_VAO) const {
+  abcg::glDeleteBuffers(1, m_EBO);
+  abcg::glDeleteBuffers(1, m_VBO);
+  abcg::glDeleteVertexArrays(1, m_VAO);
 }
