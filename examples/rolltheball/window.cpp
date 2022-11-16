@@ -13,14 +13,22 @@ template <> struct std::hash<Vertex> {
 
 void Window::onEvent(SDL_Event const &event) {
   if (event.type == SDL_KEYDOWN) {
-    if (event.key.keysym.sym == SDLK_UP || event.key.keysym.sym == SDLK_w)
+    if (event.key.keysym.sym == SDLK_UP || event.key.keysym.sym == SDLK_w) {
       m_dollySpeed = 1.0f;
-    if (event.key.keysym.sym == SDLK_DOWN || event.key.keysym.sym == SDLK_s)
+      ball.verticalSpeed = -1.0f;
+    }
+    if (event.key.keysym.sym == SDLK_DOWN || event.key.keysym.sym == SDLK_s) {
+      ball.verticalSpeed = 1.0f;
       m_dollySpeed = -1.0f;
-    if (event.key.keysym.sym == SDLK_LEFT || event.key.keysym.sym == SDLK_a)
+    }
+    if (event.key.keysym.sym == SDLK_LEFT || event.key.keysym.sym == SDLK_a) {
+      ball.horizontalSpeed = -1.0f;
       m_panSpeed = -1.0f;
-    if (event.key.keysym.sym == SDLK_RIGHT || event.key.keysym.sym == SDLK_d)
+    }
+    if (event.key.keysym.sym == SDLK_RIGHT || event.key.keysym.sym == SDLK_d) {
+      ball.horizontalSpeed = 1.0f;
       m_panSpeed = 1.0f;
+    }
     if (event.key.keysym.sym == SDLK_q)
       m_truckSpeed = -1.0f;
     if (event.key.keysym.sym == SDLK_e)
@@ -28,18 +36,26 @@ void Window::onEvent(SDL_Event const &event) {
   }
   if (event.type == SDL_KEYUP) {
     if ((event.key.keysym.sym == SDLK_UP || event.key.keysym.sym == SDLK_w) &&
-        m_dollySpeed > 0)
+        m_dollySpeed > 0) {
+      ball.verticalSpeed = 0.0f;
       m_dollySpeed = 0.0f;
+    }
     if ((event.key.keysym.sym == SDLK_DOWN || event.key.keysym.sym == SDLK_s) &&
-        m_dollySpeed < 0)
+        m_dollySpeed < 0) {
+      ball.verticalSpeed = 0.0f;
       m_dollySpeed = 0.0f;
+    }
     if ((event.key.keysym.sym == SDLK_LEFT || event.key.keysym.sym == SDLK_a) &&
-        m_panSpeed < 0)
+        m_panSpeed < 0) {
+      ball.horizontalSpeed = 0.0f;
       m_panSpeed = 0.0f;
+    }
     if ((event.key.keysym.sym == SDLK_RIGHT ||
          event.key.keysym.sym == SDLK_d) &&
-        m_panSpeed > 0)
+        m_panSpeed > 0) {
+      ball.horizontalSpeed = 0.0f;
       m_panSpeed = 0.0f;
+    }
     if (event.key.keysym.sym == SDLK_q && m_truckSpeed < 0)
       m_truckSpeed = 0.0f;
     if (event.key.keysym.sym == SDLK_e && m_truckSpeed > 0)
@@ -170,7 +186,8 @@ void Window::onUpdate() {
   auto const deltaTime{gsl::narrow_cast<float>(getDeltaTime())};
 
   // Update LookAt camera
-  m_camera.dolly(m_dollySpeed * deltaTime);
-  m_camera.truck(m_truckSpeed * deltaTime);
-  m_camera.pan(m_panSpeed * deltaTime);
+  m_camera.dolly(m_dollySpeed * deltaTime, ball.ballPosition);
+  m_camera.truck(m_truckSpeed * deltaTime, ball.ballPosition);
+  m_camera.pan(m_panSpeed * deltaTime, ball.ballPosition);
+  ball.update(deltaTime);
 }

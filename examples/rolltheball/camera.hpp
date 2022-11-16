@@ -9,15 +9,15 @@ public:
   void computeViewMatrix();
   void computeProjectionMatrix(glm::vec2 const &size);
 
-  void dolly(float speed);
-  void truck(float speed);
-  void pan(float speed);
+  void dolly(float speed, glm::vec3 newPositionAt);
+  void truck(float speed, glm::vec3 newPositionAt);
+  void pan(float speed, glm::vec3 newPositionAt);
 
   glm::mat4 const &getViewMatrix() const { return m_viewMatrix; }
   glm::mat4 const &getProjMatrix() const { return m_projMatrix; }
 
 private:
-  glm::vec3 m_eye{0.0f, 2.0f, 2.5f}; // Camera position
+  glm::vec3 m_eye{0.0f, 1.5f, 1.5f}; // Camera position
   glm::vec3 m_at{0.0f, 0.5f, 0.0f};  // Look-at point
   glm::vec3 m_up{0.0f, 1.0f, 0.0f};  // "up" direction
 
