@@ -1,3 +1,3 @@
 project(rolltheball)
-add_executable(${PROJECT_NAME} main.cpp window.cpp camera.cpp ground.cpp model.cpp)
+add_executable(${PROJECT_NAME} main.cpp window.cpp camera.cpp ground.cpp model.cpp ball.cpp)
 enable_abcg(${PROJECT_NAME})

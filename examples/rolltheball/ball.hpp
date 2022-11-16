@@ -19,6 +19,11 @@ public:
 
   std::vector<Vertex> m_vertices;
   std::vector<GLuint> m_indices;
+
+  float verticalSpeed{};
+  float horizontalSpeed{};
+
+  void update(float deltaTime);
 };
 
 #endif
