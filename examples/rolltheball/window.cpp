@@ -186,8 +186,8 @@ void Window::onUpdate() {
   auto const deltaTime{gsl::narrow_cast<float>(getDeltaTime())};
 
   // Update LookAt camera
-  m_camera.dolly(m_dollySpeed * deltaTime, ball.ballPosition);
-  m_camera.truck(m_truckSpeed * deltaTime, ball.ballPosition);
-  m_camera.pan(m_panSpeed * deltaTime, ball.ballPosition);
+  m_camera.dolly(ball.ballPosition);
+  m_camera.truck(ball.ballPosition);
+  m_camera.pan(ball.ballPosition);
   ball.update(deltaTime);
 }
