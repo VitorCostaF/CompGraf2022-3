@@ -90,8 +90,6 @@ void Window::onCreate() {
 
   m_model.setupVAO(m_program, &wall.m_VBO, &wall.m_EBO, &wall.m_VAO);
 
-  // fmt::print("{}", ball.m_vertices.at(0).position.y);
-
   // Get location of uniform variables
   m_viewMatrixLocation = abcg::glGetUniformLocation(m_program, "viewMatrix");
   m_projMatrixLocation = abcg::glGetUniformLocation(m_program, "projMatrix");
@@ -124,7 +122,7 @@ void Window::onPaint() {
 
   // South wall
   model = glm::mat4(1.0);
-  model = glm::translate(model, glm::vec3{0.0f, 0.2f, 0.925f});
+  model = glm::translate(model, glm::vec3{0.0f, 0.2f, 0.96f});
 
   abcg::glUniformMatrix4fv(m_modelMatrixLocation, 1, GL_FALSE, &model[0][0]);
   abcg::glUniform4f(m_colorLocation, 1.0f, 0.8f, 0.0f, 1.0f);
@@ -133,7 +131,7 @@ void Window::onPaint() {
 
   // North wall
   model = glm::mat4(1.0);
-  model = glm::translate(model, glm::vec3{0.0f, 0.2f, -0.925f});
+  model = glm::translate(model, glm::vec3{0.0f, 0.2f, -0.96f});
 
   abcg::glUniformMatrix4fv(m_modelMatrixLocation, 1, GL_FALSE, &model[0][0]);
   abcg::glUniform4f(m_colorLocation, 1.0f, 0.8f, 0.0f, 1.0f);
@@ -142,7 +140,7 @@ void Window::onPaint() {
 
   // East Wall
   model = glm::mat4(1.0);
-  model = glm::translate(model, glm::vec3{0.925f, 0.2f, 0.0f});
+  model = glm::translate(model, glm::vec3{0.96f, 0.2f, 0.0f});
   model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(0, 1, 0));
 
   abcg::glUniformMatrix4fv(m_modelMatrixLocation, 1, GL_FALSE, &model[0][0]);
@@ -152,7 +150,7 @@ void Window::onPaint() {
 
   // West Wall
   model = glm::mat4(1.0);
-  model = glm::translate(model, glm::vec3{-0.925f, 0.2f, 0.0f});
+  model = glm::translate(model, glm::vec3{-0.96f, 0.2f, 0.0f});
   model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(0, 1, 0));
 
   abcg::glUniformMatrix4fv(m_modelMatrixLocation, 1, GL_FALSE, &model[0][0]);
@@ -185,9 +183,22 @@ void Window::onDestroy() {
 void Window::onUpdate() {
   auto const deltaTime{gsl::narrow_cast<float>(getDeltaTime())};
 
+  checkWallColision();
   // Update LookAt camera
   m_camera.dolly(ball.ballPosition);
   m_camera.truck(ball.ballPosition);
   m_camera.pan(ball.ballPosition);
   ball.update(deltaTime);
+}
+
+void Window::checkWallColision() {
+  if ((ball.ballPosition.x > 0.85f && ball.horizontalSpeed > 0) ||
+      (ball.ballPosition.x < -0.85f && ball.horizontalSpeed < 0)) {
+    ball.horizontalSpeed = 0.0f;
+  }
+
+  if ((ball.ballPosition.z > 0.85f && ball.verticalSpeed > 0) ||
+      (ball.ballPosition.z < -0.85f && ball.verticalSpeed < 0)) {
+    ball.verticalSpeed = 0.0f;
+  }
 }

@@ -46,6 +46,7 @@ private:
   std::vector<GLuint> m_indices;
 
   void loadModelFromFile(std::string_view path);
+  void checkWallColision();
 };
 
 #endif
