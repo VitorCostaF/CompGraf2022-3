@@ -12,58 +12,60 @@ template <> struct std::hash<Vertex> {
 };
 
 void Window::onEvent(SDL_Event const &event) {
+  // Nessa função recebemos a entrada do teclado. Nesse primeiro if de tecla
+  // apertada se apertamos para cima (ou w) ou para baixo (ou s) atribuimos a
+  // velocidade vertical da bolinha para ela se mover para cima ou para baixo ao
+  // longo do eixo z. Se apertamos para a direta (ou d) ou para a esquerda (ou
+  // a) mexemos na velocidade horizontal da bolinha para se deslocar ao longo do
+  // eixo x.
   if (event.type == SDL_KEYDOWN) {
     if (event.key.keysym.sym == SDLK_UP || event.key.keysym.sym == SDLK_w) {
-      m_dollySpeed = 1.0f;
       ball.verticalSpeed = -1.0f;
     }
     if (event.key.keysym.sym == SDLK_DOWN || event.key.keysym.sym == SDLK_s) {
       ball.verticalSpeed = 1.0f;
-      m_dollySpeed = -1.0f;
     }
     if (event.key.keysym.sym == SDLK_LEFT || event.key.keysym.sym == SDLK_a) {
       ball.horizontalSpeed = -1.0f;
-      m_panSpeed = -1.0f;
     }
     if (event.key.keysym.sym == SDLK_RIGHT || event.key.keysym.sym == SDLK_d) {
       ball.horizontalSpeed = 1.0f;
-      m_panSpeed = 1.0f;
     }
-    if (event.key.keysym.sym == SDLK_q)
-      m_truckSpeed = -1.0f;
-    if (event.key.keysym.sym == SDLK_e)
-      m_truckSpeed = 1.0f;
   }
+  // Nessa seguanda parte, ao soltarmos a tecla apertada, seja para cima ou para
+  // baixo, esquerda ou direita, 'resetamos' (atribuimos zero) a velocidade
+  // respectiva, vertical ou horizontal, mas sempre checando se já temos uma
+  // velocidade naquele sentido
   if (event.type == SDL_KEYUP) {
     if ((event.key.keysym.sym == SDLK_UP || event.key.keysym.sym == SDLK_w) &&
         m_dollySpeed > 0) {
       ball.verticalSpeed = 0.0f;
-      m_dollySpeed = 0.0f;
     }
     if ((event.key.keysym.sym == SDLK_DOWN || event.key.keysym.sym == SDLK_s) &&
         m_dollySpeed < 0) {
       ball.verticalSpeed = 0.0f;
-      m_dollySpeed = 0.0f;
     }
     if ((event.key.keysym.sym == SDLK_LEFT || event.key.keysym.sym == SDLK_a) &&
         m_panSpeed < 0) {
       ball.horizontalSpeed = 0.0f;
-      m_panSpeed = 0.0f;
     }
     if ((event.key.keysym.sym == SDLK_RIGHT ||
          event.key.keysym.sym == SDLK_d) &&
         m_panSpeed > 0) {
       ball.horizontalSpeed = 0.0f;
-      m_panSpeed = 0.0f;
     }
-    if (event.key.keysym.sym == SDLK_q && m_truckSpeed < 0)
-      m_truckSpeed = 0.0f;
-    if (event.key.keysym.sym == SDLK_e && m_truckSpeed > 0)
-      m_truckSpeed = 0.0f;
   }
 }
 
 void Window::onCreate() {
+  // Nessa função carregamos os objetos seguindo o padrão das demais atividades.
+  // Vale notar que a classe de carregamento do modelo foi mexida para a tornar
+  // genérica de forma que passamos o objeto e essa classe carrega as
+  // informações dos modelos para os atributos desse objeto. Por exemplo temos o
+  // objeto ball, onde carregamos o modelo geosphere.obj e a classe model é
+  // responsavel por preencher os vértices e índices do objeto ball, bem como os
+  // objetos de renderização (EBO, VBO e VAO). Por fim, pegamos as posições das
+  // matrizes e da cor.
   auto const &assetsPath{abcg::Application::getAssetsPath()};
 
   abcg::glClearColor(0, 0, 0, 1);
@@ -98,6 +100,9 @@ void Window::onCreate() {
 }
 
 void Window::onPaint() {
+  // Nessa função desenhamos os objetos da cena: bola, paredes e chão. As
+  // paredes formam um quadrado que limita o movimento da bolinha.
+
   // Clear color buffer and depth buffer
   abcg::glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -112,6 +117,9 @@ void Window::onPaint() {
   abcg::glUniformMatrix4fv(m_projMatrixLocation, 1, GL_FALSE,
                            &m_camera.getProjMatrix()[0][0]);
 
+  // Abaixo desenhamos cada objeto da cena
+
+  // Aqui desenhamos o objeto ball
   glm::mat4 model{1.0f};
   model = glm::translate(model, ball.ballPosition);
   model = glm::scale(model, glm::vec3(0.1f));
@@ -120,7 +128,8 @@ void Window::onPaint() {
   abcg::glUniform4f(m_colorLocation, 1.0f, 1.0f, 1.0f, 1.0f);
   m_model.render(&ball.m_indices, &ball.m_VAO);
 
-  // South wall
+  // Desenho da parede sul. Notemos que a posição foi escolhida para alinhamento
+  // dos cantos (encontro das paredes)
   model = glm::mat4(1.0);
   model = glm::translate(model, glm::vec3{0.0f, 0.2f, 0.96f});
 
@@ -129,7 +138,8 @@ void Window::onPaint() {
 
   m_model.render(&wall.m_indices, &wall.m_VAO);
 
-  // North wall
+  // Desenho da parede norte. A posição z tem a mesma lógica da anterior, porém
+  // refletida em relação a origem
   model = glm::mat4(1.0);
   model = glm::translate(model, glm::vec3{0.0f, 0.2f, -0.96f});
 
@@ -138,7 +148,8 @@ void Window::onPaint() {
 
   m_model.render(&wall.m_indices, &wall.m_VAO);
 
-  // East Wall
+  // Desenho da parede leste. A lógica da coordenada z das paredes anteriores
+  // foi aplicada na coordenada x dessa parede
   model = glm::mat4(1.0);
   model = glm::translate(model, glm::vec3{0.96f, 0.2f, 0.0f});
   model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(0, 1, 0));
@@ -148,7 +159,8 @@ void Window::onPaint() {
 
   m_model.render(&wall.m_indices, &wall.m_VAO);
 
-  // West Wall
+  // Desenho da parede oeste. Mesma lógica da parede anterior para a coordenada
+  // x, porém refletida pela origem.
   model = glm::mat4(1.0);
   model = glm::translate(model, glm::vec3{-0.96f, 0.2f, 0.0f});
   model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(0, 1, 0));
