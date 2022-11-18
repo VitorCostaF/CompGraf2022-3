@@ -4,10 +4,13 @@
 #include "abcgOpenGL.hpp"
 
 #include "ball.hpp"
+#include "box.hpp"
 #include "camera.hpp"
 #include "ground.hpp"
 #include "model.hpp"
 #include "wall.hpp"
+#include <random>
+#include <vector>
 
 class Window : public abcg::OpenGLWindow {
 protected:
@@ -20,6 +23,7 @@ protected:
   void onUpdate() override;
 
 private:
+  std::default_random_engine m_randomEngine;
   glm::ivec2 m_viewportSize{};
 
   GLuint m_VAO{};
@@ -33,20 +37,22 @@ private:
   GLint m_colorLocation{};
 
   Camera m_camera;
-  float m_dollySpeed{};
-  float m_truckSpeed{};
-  float m_panSpeed{};
 
   Ground m_ground;
   Model m_model;
   Ball ball;
   Wall wall;
+  std::vector<Box> boxes;
+
+  int qtdBoxes{20};
 
   std::vector<Vertex> m_vertices;
   std::vector<GLuint> m_indices;
 
   void loadModelFromFile(std::string_view path);
   void checkWallColision();
+  void randomizeBox(Box &box);
+  bool checkBoxesColision(Box newBox);
 };
 
 #endif

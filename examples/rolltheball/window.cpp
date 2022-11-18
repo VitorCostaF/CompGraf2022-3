@@ -38,20 +38,20 @@ void Window::onEvent(SDL_Event const &event) {
   // velocidade naquele sentido
   if (event.type == SDL_KEYUP) {
     if ((event.key.keysym.sym == SDLK_UP || event.key.keysym.sym == SDLK_w) &&
-        m_dollySpeed > 0) {
+        ball.verticalSpeed < 0) {
       ball.verticalSpeed = 0.0f;
     }
     if ((event.key.keysym.sym == SDLK_DOWN || event.key.keysym.sym == SDLK_s) &&
-        m_dollySpeed < 0) {
+        ball.verticalSpeed > 0) {
       ball.verticalSpeed = 0.0f;
     }
     if ((event.key.keysym.sym == SDLK_LEFT || event.key.keysym.sym == SDLK_a) &&
-        m_panSpeed < 0) {
+        ball.horizontalSpeed < 0) {
       ball.horizontalSpeed = 0.0f;
     }
     if ((event.key.keysym.sym == SDLK_RIGHT ||
          event.key.keysym.sym == SDLK_d) &&
-        m_panSpeed > 0) {
+        ball.horizontalSpeed > 0) {
       ball.horizontalSpeed = 0.0f;
     }
   }
@@ -68,22 +68,27 @@ void Window::onCreate() {
   // matrizes e da cor.
   auto const &assetsPath{abcg::Application::getAssetsPath()};
 
-  abcg::glClearColor(0, 0, 0, 1);
+  auto const seed{std::chrono::steady_clock::now().time_since_epoch().count()};
+  m_randomEngine.seed(seed);
+
+  // Colorimos o back ground de azul para simular o ceu
+  abcg::glClearColor(0.2f, 0.9f, 1.0f, 1);
 
   // Enable depth buffering
   abcg::glEnable(GL_DEPTH_TEST);
 
-  // Create program
+  // Criação do programa
   m_program =
       abcg::createOpenGLProgram({{.source = assetsPath + "lookat.vert",
                                   .stage = abcg::ShaderStage::Vertex},
                                  {.source = assetsPath + "lookat.frag",
                                   .stage = abcg::ShaderStage::Fragment}});
-
+  // Inicializamos os buffers para o chão
   m_ground.create(m_program);
 
-  m_model.loadObj(assetsPath + "geosphere.obj", &ball.m_vertices,
-                  &ball.m_indices, &ball.m_VBO, &ball.m_EBO);
+  // Carregamos os índices e vértices para a bola
+  m_model.loadObj(assetsPath + "sphere.obj", &ball.m_vertices, &ball.m_indices,
+                  &ball.m_VBO, &ball.m_EBO);
 
   m_model.setupVAO(m_program, &ball.m_VBO, &ball.m_EBO, &ball.m_VAO);
 
@@ -91,12 +96,51 @@ void Window::onCreate() {
                   &wall.m_indices, &wall.m_VBO, &wall.m_EBO);
 
   m_model.setupVAO(m_program, &wall.m_VBO, &wall.m_EBO, &wall.m_VAO);
+  int i = 0;
+  while (i < qtdBoxes) {
+    Box box;
+    m_model.loadObj(assetsPath + "box.obj", &box.m_vertices, &box.m_indices,
+                    &box.m_VBO, &box.m_EBO);
 
+    m_model.setupVAO(m_program, &box.m_VBO, &box.m_EBO, &box.m_VAO);
+    randomizeBox(box);
+    if (!checkBoxesColision(box)) {
+      boxes.emplace_back(box);
+      i++;
+    }
+  }
   // Get location of uniform variables
   m_viewMatrixLocation = abcg::glGetUniformLocation(m_program, "viewMatrix");
   m_projMatrixLocation = abcg::glGetUniformLocation(m_program, "projMatrix");
   m_modelMatrixLocation = abcg::glGetUniformLocation(m_program, "modelMatrix");
   m_colorLocation = abcg::glGetUniformLocation(m_program, "color");
+}
+
+bool Window::checkBoxesColision(Box newBox) {
+  // Aqui checamos se estamos sorteando uma box muito perto das outras ou perto
+  // da bola. Usamos a boxScale e callScale, pois esses objetos foram
+  // normalizados e então a escala representa o tamanho do objeto. Rigorosamente
+  // falando deveriamos pegar a metade da escala para já evitar a colisão, porém
+  // deixar um pouco mais distante ainda não há problema, é até melhor
+  for (auto box : boxes) {
+    auto const distance{glm::distance(box.boxPosition, newBox.boxPosition)};
+    auto const ballDistance{
+        glm::distance(newBox.boxPosition, ball.ballPosition)};
+    if (distance < 2 * box.boxScale ||
+        ballDistance < (box.boxScale + ball.ballScale)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+void Window::randomizeBox(Box &box) {
+  std::uniform_real_distribution<float> distPos(-0.9f, 0.9f);
+  box.boxPosition =
+      glm::vec3(distPos(m_randomEngine), 0.2f, distPos(m_randomEngine));
+
+  // Random rotation axis
+  // star.m_rotationAxis = glm::sphericalRand(1.0f);
 }
 
 void Window::onPaint() {
@@ -122,7 +166,7 @@ void Window::onPaint() {
   // Aqui desenhamos o objeto ball
   glm::mat4 model{1.0f};
   model = glm::translate(model, ball.ballPosition);
-  model = glm::scale(model, glm::vec3(0.1f));
+  model = glm::scale(model, glm::vec3(ball.ballScale));
 
   abcg::glUniformMatrix4fv(m_modelMatrixLocation, 1, GL_FALSE, &model[0][0]);
   abcg::glUniform4f(m_colorLocation, 1.0f, 1.0f, 1.0f, 1.0f);
@@ -170,7 +214,20 @@ void Window::onPaint() {
 
   m_model.render(&wall.m_indices, &wall.m_VAO);
 
-  // Draw ground
+  for (int i = 0; i < qtdBoxes; i++) {
+    Box box = boxes.at(i);
+    model = glm::mat4(1.0);
+    model = glm::translate(model, box.boxPosition);
+    model = glm::scale(model, glm::vec3(box.boxScale));
+
+    abcg::glUniformMatrix4fv(m_modelMatrixLocation, 1, GL_FALSE, &model[0][0]);
+    abcg::glUniform4f(m_colorLocation, 1.0f, 1.0f, 1.0f, 1.0f);
+    // model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(0, 1, 0));
+
+    m_model.render(&box.m_indices, &box.m_VAO);
+  }
+
+  // Desenho chão
   m_ground.paint();
 
   abcg::glUseProgram(0);
@@ -196,10 +253,11 @@ void Window::onUpdate() {
   auto const deltaTime{gsl::narrow_cast<float>(getDeltaTime())};
 
   checkWallColision();
+
   // Update LookAt camera
-  m_camera.dolly(ball.ballPosition);
-  m_camera.truck(ball.ballPosition);
-  m_camera.pan(ball.ballPosition);
+  m_camera.move(ball.ballPosition);
+
+  // Update
   ball.update(deltaTime);
 }
 

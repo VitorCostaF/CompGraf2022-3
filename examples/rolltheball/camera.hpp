@@ -9,9 +9,7 @@ public:
   void computeViewMatrix();
   void computeProjectionMatrix(glm::vec2 const &size);
 
-  void dolly(glm::vec3 newPositionAt);
-  void truck(glm::vec3 newPositionAt);
-  void pan(glm::vec3 newPositionAt);
+  void move(glm::vec3 newPositionAt);
 
   glm::mat4 const &getViewMatrix() const { return m_viewMatrix; }
   glm::mat4 const &getProjMatrix() const { return m_projMatrix; }

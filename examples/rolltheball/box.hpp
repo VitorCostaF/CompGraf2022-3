@@ -1,11 +1,11 @@
-#ifndef BALL_HPP_
-#define BALL_HPP_
+#ifndef BOX_HPP_
+#define BOX_HPP_
 
 #include "abcgOpenGL.hpp"
 
 #include "model.hpp"
 
-class Ball {
+class Box {
 public:
   [[nodiscard]] int getNumTriangles() const {
     return gsl::narrow<int>(m_indices.size()) / 3;
@@ -15,14 +15,12 @@ public:
   GLuint m_VBO{};
   GLuint m_EBO{};
 
-  glm::vec3 ballPosition{0.0f, 0.2f, 0.0f};
+  glm::vec3 boxPosition{0.0f, 0.2f, 0.0f};
 
   std::vector<Vertex> m_vertices;
   std::vector<GLuint> m_indices;
 
-  float verticalSpeed{};
-  float horizontalSpeed{};
-  float ballScale{0.1f};
+  float boxScale{0.05f};
 
   void update(float deltaTime);
 };

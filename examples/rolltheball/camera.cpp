@@ -1,6 +1,5 @@
 #include "camera.hpp"
 
-#include <glm/fwd.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
 void Camera::computeProjectionMatrix(glm::vec2 const &size) {
@@ -13,17 +12,7 @@ void Camera::computeViewMatrix() {
   m_viewMatrix = glm::lookAt(m_eye, m_at, m_up);
 }
 
-void Camera::dolly(glm::vec3 newPositionAt) {
-  m_at = newPositionAt;
-  computeViewMatrix();
-}
-
-void Camera::truck(glm::vec3 newPositionAt) {
-  m_at = newPositionAt;
-  computeViewMatrix();
-}
-
-void Camera::pan(glm::vec3 newPositionAt) {
+void Camera::move(glm::vec3 newPositionAt) {
   m_at = newPositionAt;
   computeViewMatrix();
 }

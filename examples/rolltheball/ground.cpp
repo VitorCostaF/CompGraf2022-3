@@ -38,15 +38,17 @@ void Ground::paint() {
   // origin
   auto const N{5};
   for (auto const z : iter::range(-N, N + 1)) {
-    for (auto const x : iter::range(-N, N + 1)) {
+    for (auto const x : iter::range(-N - 3, N + 4)) {
       // Set model matrix as a translation matrix
       glm::mat4 model{1.0f};
       model = glm::translate(model, glm::vec3(x, 0.0f, z));
       abcg::glUniformMatrix4fv(m_modelMatrixLoc, 1, GL_FALSE, &model[0][0]);
 
-      // Set color (checkerboard pattern)
-      auto const gray{(z + x) % 2 == 0 ? 1.0f : 0.5f};
-      abcg::glUniform4f(m_colorLoc, gray, gray, gray, 1.0f);
+      if (z >= -1 && z <= 1 && x >= -1 && x <= 1) {
+        abcg::glUniform4f(m_colorLoc, 0.3176f, 0.2078f, 0.1333f, 1.0f);
+      } else {
+        abcg::glUniform4f(m_colorLoc, 0.1333f, 0.5451f, 0.1333f, 1.0f);
+      }
 
       abcg::glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
     }
