@@ -1,6 +1,8 @@
 #include "window.hpp"
 #include "core.h"
 
+#include <glm/gtc/random.hpp>
+#include <glm/gtx/fast_trigonometry.hpp>
 #include <unordered_map>
 
 // Explicit specialization of std::hash for Vertex
@@ -74,7 +76,7 @@ void Window::onCreate() {
   // Colorimos o back ground de azul para simular o ceu
   abcg::glClearColor(0.2f, 0.9f, 1.0f, 1);
 
-  // Enable depth buffering
+  // Habilitamos depth buffering
   abcg::glEnable(GL_DEPTH_TEST);
 
   // Criação do programa
@@ -86,10 +88,11 @@ void Window::onCreate() {
   // Inicializamos os buffers para o chão
   m_ground.create(m_program);
 
-  // Carregamos os índices e vértices para a bola
+  // Carregamos os índices e vértices para a bola a partir do sphere.obj
   m_model.loadObj(assetsPath + "sphere.obj", &ball.m_vertices, &ball.m_indices,
                   &ball.m_VBO, &ball.m_EBO);
 
+  // Inicializamos os buffers para a bola
   m_model.setupVAO(m_program, &ball.m_VBO, &ball.m_EBO, &ball.m_VAO);
 
   m_model.loadObj(assetsPath + "rectangle.obj", &wall.m_vertices,
@@ -135,12 +138,20 @@ bool Window::checkBoxesColision(Box newBox) {
 }
 
 void Window::randomizeBox(Box &box) {
+  // Aqui vamos sortear aleatoriamente a posição das boxes, distPos, e o
+  // movimento angular em torno do eixo de rotação, também sorteado
+  // aleatoriamente.
+
+  // Sorteamos a posição entre -0.9 e 0.9 para as boxes não seírem dos limites
+  // do jogo.
   std::uniform_real_distribution<float> distPos(-0.9f, 0.9f);
+  std::uniform_real_distribution<float> angularSpeed(90.0f, 360.0f);
   box.boxPosition =
       glm::vec3(distPos(m_randomEngine), 0.2f, distPos(m_randomEngine));
 
+  box.angularSpeed = angularSpeed(m_randomEngine);
   // Random rotation axis
-  // star.m_rotationAxis = glm::sphericalRand(1.0f);
+  box.rotationAxis = glm::sphericalRand(1.0f);
 }
 
 void Window::onPaint() {
@@ -163,7 +174,10 @@ void Window::onPaint() {
 
   // Abaixo desenhamos cada objeto da cena
 
-  // Aqui desenhamos o objeto ball
+  // Aqui desenhamos o objeto ball. Estamos transladando para a posição
+  // ballPosition, que será atualizada conforme apertamos as setas. Também
+  // estamos usando uma escala para diminuir a bola senão ela ficaria do tamanho
+  // da tela devido a normalização, função standardize() da classe model.
   glm::mat4 model{1.0f};
   model = glm::translate(model, ball.ballPosition);
   model = glm::scale(model, glm::vec3(ball.ballScale));
@@ -219,6 +233,7 @@ void Window::onPaint() {
     model = glm::mat4(1.0);
     model = glm::translate(model, box.boxPosition);
     model = glm::scale(model, glm::vec3(box.boxScale));
+    model = glm::rotate(model, box.angle, box.rotationAxis);
 
     abcg::glUniformMatrix4fv(m_modelMatrixLocation, 1, GL_FALSE, &model[0][0]);
     abcg::glUniform4f(m_colorLocation, 1.0f, 1.0f, 1.0f, 1.0f);
@@ -259,6 +274,11 @@ void Window::onUpdate() {
 
   // Update
   ball.update(deltaTime);
+
+  for (auto &box : boxes) {
+    box.angle =
+        glm::wrapAngle(box.angle + glm::radians(box.angularSpeed) * deltaTime);
+  }
 }
 
 void Window::checkWallColision() {

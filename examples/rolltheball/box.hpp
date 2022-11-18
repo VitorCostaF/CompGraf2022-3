@@ -16,11 +16,14 @@ public:
   GLuint m_EBO{};
 
   glm::vec3 boxPosition{0.0f, 0.2f, 0.0f};
+  glm::vec3 rotationAxis{};
 
   std::vector<Vertex> m_vertices;
   std::vector<GLuint> m_indices;
 
   float boxScale{0.05f};
+  float angle{};
+  float angularSpeed{};
 
   void update(float deltaTime);
 };
