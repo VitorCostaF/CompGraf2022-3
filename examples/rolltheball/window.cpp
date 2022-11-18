@@ -107,7 +107,7 @@ void Window::onCreate() {
 
     m_model.setupVAO(m_program, &box.m_VBO, &box.m_EBO, &box.m_VAO);
     randomizeBox(box);
-    if (!checkBoxesColision(box)) {
+    if (!checkBoxValidPosition(box)) {
       boxes.emplace_back(box);
       i++;
     }
@@ -119,18 +119,18 @@ void Window::onCreate() {
   m_colorLocation = abcg::glGetUniformLocation(m_program, "color");
 }
 
-bool Window::checkBoxesColision(Box newBox) {
+bool Window::checkBoxValidPosition(Box newBox) {
   // Aqui checamos se estamos sorteando uma box muito perto das outras ou perto
   // da bola. Usamos a boxScale e callScale, pois esses objetos foram
-  // normalizados e então a escala representa o tamanho do objeto. Rigorosamente
-  // falando deveriamos pegar a metade da escala para já evitar a colisão, porém
-  // deixar um pouco mais distante ainda não há problema, é até melhor
+  // normalizados e então a escala representa o raio do circulo com centro no
+  // objeto. Porém, multiplicamos pelos fatores 4 e 2 para deixar uma distância
+  // maior entre os objetos.
   for (auto box : boxes) {
     auto const distance{glm::distance(box.boxPosition, newBox.boxPosition)};
     auto const ballDistance{
         glm::distance(newBox.boxPosition, ball.ballPosition)};
-    if (distance < 2 * box.boxScale ||
-        ballDistance < (box.boxScale + ball.ballScale)) {
+    if (distance < 4 * box.boxScale ||
+        ballDistance < 2 * (box.boxScale + ball.ballScale)) {
       return true;
     }
   }
@@ -144,7 +144,9 @@ void Window::randomizeBox(Box &box) {
 
   // Sorteamos a posição entre -0.9 e 0.9 para as boxes não seírem dos limites
   // do jogo.
-  std::uniform_real_distribution<float> distPos(-0.9f, 0.9f);
+  std::uniform_real_distribution<float> distPos(-0.8f, 0.8f);
+
+  // Sorteamos uma velocidade angular para a box girar em torno do eixo.
   std::uniform_real_distribution<float> angularSpeed(90.0f, 360.0f);
   box.boxPosition =
       glm::vec3(distPos(m_randomEngine), 0.2f, distPos(m_randomEngine));
@@ -228,7 +230,7 @@ void Window::onPaint() {
 
   m_model.render(&wall.m_indices, &wall.m_VAO);
 
-  for (int i = 0; i < qtdBoxes; i++) {
+  for (int i = 0; i < (int)boxes.size(); i++) {
     Box box = boxes.at(i);
     model = glm::mat4(1.0);
     model = glm::translate(model, box.boxPosition);
@@ -268,6 +270,8 @@ void Window::onUpdate() {
   auto const deltaTime{gsl::narrow_cast<float>(getDeltaTime())};
 
   checkWallColision();
+  checkBoxColision();
+  checkActiveBoxes();
 
   // Update LookAt camera
   m_camera.move(ball.ballPosition);
@@ -278,6 +282,25 @@ void Window::onUpdate() {
   for (auto &box : boxes) {
     box.angle =
         glm::wrapAngle(box.angle + glm::radians(box.angularSpeed) * deltaTime);
+  }
+}
+
+void Window::checkActiveBoxes() {
+  for (int i = 0; i < (int)boxes.size(); i++) {
+    Box box = boxes.at(i);
+    if (box.colision) {
+      boxes.erase(boxes.begin() + i);
+    }
+  }
+}
+
+void Window::checkBoxColision() {
+  for (auto &box : boxes) {
+    auto const ballDistance{glm::distance(box.boxPosition, ball.ballPosition)};
+
+    if (ballDistance < (0.5f * box.boxScale + 0.5f * ball.ballScale)) {
+      box.colision = true;
+    }
   }
 }
 

@@ -24,6 +24,7 @@ public:
   float boxScale{0.05f};
   float angle{};
   float angularSpeed{};
+  bool colision{false};
 
   void update(float deltaTime);
 };

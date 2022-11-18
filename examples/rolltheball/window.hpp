@@ -52,7 +52,9 @@ private:
   void loadModelFromFile(std::string_view path);
   void checkWallColision();
   void randomizeBox(Box &box);
-  bool checkBoxesColision(Box newBox);
+  bool checkBoxValidPosition(Box newBox);
+  void checkBoxColision();
+  void checkActiveBoxes();
 };
 
 #endif
