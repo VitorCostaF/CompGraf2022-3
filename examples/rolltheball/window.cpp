@@ -69,9 +69,16 @@ void Window::onCreate() {
   // objetos de renderização (EBO, VBO e VAO). Por fim, pegamos as posições das
   // matrizes e da cor.
   auto const &assetsPath{abcg::Application::getAssetsPath()};
+  auto const filename{assetsPath + "Inconsolata-Medium.ttf"};
+  m_font = ImGui::GetIO().Fonts->AddFontFromFileTTF(filename.c_str(), 60.0f);
+  if (m_font == nullptr) {
+    throw abcg::RuntimeError("Cannot load font file");
+  }
 
   auto const seed{std::chrono::steady_clock::now().time_since_epoch().count()};
   m_randomEngine.seed(seed);
+
+  m_gameData.m_state = State::Playing;
 
   // Colorimos o back ground de azul para simular o ceu
   abcg::glClearColor(0.2f, 0.9f, 1.0f, 1);
@@ -238,8 +245,7 @@ void Window::onPaint() {
     model = glm::rotate(model, box.angle, box.rotationAxis);
 
     abcg::glUniformMatrix4fv(m_modelMatrixLocation, 1, GL_FALSE, &model[0][0]);
-    abcg::glUniform4f(m_colorLocation, 1.0f, 1.0f, 1.0f, 1.0f);
-    // model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(0, 1, 0));
+    abcg::glUniform4f(m_colorLocation, 1.0f, 0.498f, 0.3137f, 1.0f);
 
     m_model.render(&box.m_indices, &box.m_VAO);
   }
@@ -250,7 +256,46 @@ void Window::onPaint() {
   abcg::glUseProgram(0);
 }
 
-void Window::onPaintUI() { abcg::OpenGLWindow::onPaintUI(); }
+void Window::onPaintUI() {
+  abcg::OpenGLWindow::onPaintUI();
+
+  if (m_gameData.m_state != State::Playing) {
+    auto const size{ImVec2(350, 300)};
+    auto const position{ImVec2((m_viewportSize.x - size.x) / 2.0f,
+                               (m_viewportSize.y - size.y) / 2.0f)};
+    ImGui::SetNextWindowPos(position);
+    ImGui::SetNextWindowSize(size);
+    ImGuiWindowFlags const flags{ImGuiWindowFlags_NoBackground |
+                                 ImGuiWindowFlags_NoTitleBar |
+                                 ImGuiWindowFlags_NoInputs};
+    ImGui::Begin(" ", nullptr, flags);
+    ImGui::PushFont(m_font);
+    if (m_gameData.m_state == State::GameOver) {
+      ImGui::Text("Game Over!");
+    } else {
+      ImGui::Text("You Win!");
+    }
+    ImGui::Text("Press Enter");
+
+    ImGui::PopFont();
+    ImGui::End();
+  } else {
+    auto const size{ImVec2(350, 300)};
+    auto const position{ImVec2((m_viewportSize.x) / 2.0f - 20.0f, 0)};
+    ImGui::SetNextWindowPos(position);
+    ImGui::SetNextWindowSize(size);
+    ImGuiWindowFlags const flags{ImGuiWindowFlags_NoBackground |
+                                 ImGuiWindowFlags_NoTitleBar |
+                                 ImGuiWindowFlags_NoInputs};
+    ImGui::Begin(" ", nullptr, flags);
+    ImGui::PushFont(m_font);
+    int remainTime = maxTime - (int)timeElapsed;
+    ImGui::Text("%d", remainTime < 0 ? 0 : remainTime);
+
+    ImGui::PopFont();
+    ImGui::End();
+  }
+}
 
 void Window::onResize(glm::ivec2 const &size) {
   m_viewportSize = size;
@@ -268,20 +313,33 @@ void Window::onDestroy() {
 
 void Window::onUpdate() {
   auto const deltaTime{gsl::narrow_cast<float>(getDeltaTime())};
-
+  // Checagem da colisão com as paredes
   checkWallColision();
-  checkBoxColision();
-  checkActiveBoxes();
-
   // Update LookAt camera
   m_camera.move(ball.ballPosition);
-
   // Update
   ball.update(deltaTime);
 
   for (auto &box : boxes) {
     box.angle =
         glm::wrapAngle(box.angle + glm::radians(box.angularSpeed) * deltaTime);
+  }
+
+  if (m_gameData.m_state != State::Playing) {
+    return;
+  }
+  timeElapsed += deltaTime;
+  checkBoxColision();
+  checkActiveBoxes();
+  int remainedTime = maxTime - (int)timeElapsed;
+
+  if (boxes.size() == 0) {
+    m_gameData.m_state = State::Win;
+    return;
+  }
+
+  if (remainedTime <= 0) {
+    m_gameData.m_state = State::GameOver;
   }
 }
 

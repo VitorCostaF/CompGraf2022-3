@@ -6,6 +6,7 @@
 #include "ball.hpp"
 #include "box.hpp"
 #include "camera.hpp"
+#include "gamedata.hpp"
 #include "ground.hpp"
 #include "model.hpp"
 #include "wall.hpp"
@@ -35,9 +36,10 @@ private:
   GLint m_projMatrixLocation{};
   GLint m_modelMatrixLocation{};
   GLint m_colorLocation{};
+  ImFont *m_font{};
 
   Camera m_camera;
-
+  GameData m_gameData;
   Ground m_ground;
   Model m_model;
   Ball ball;
@@ -48,6 +50,9 @@ private:
 
   std::vector<Vertex> m_vertices;
   std::vector<GLuint> m_indices;
+
+  float timeElapsed{};
+  int maxTime{20};
 
   void loadModelFromFile(std::string_view path);
   void checkWallColision();
