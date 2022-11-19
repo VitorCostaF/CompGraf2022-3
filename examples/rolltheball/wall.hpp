@@ -21,6 +21,7 @@ public:
   std::vector<GLuint> m_indices;
 
   void create(Model m_model, GLuint m_program, const std::string assetsPath);
+  void paint(GLuint colorLocation, GLuint modelMatrixLocation, Model m_model);
 };
 
 #endif

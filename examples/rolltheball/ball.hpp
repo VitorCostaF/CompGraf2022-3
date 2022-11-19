@@ -26,6 +26,8 @@ public:
 
   void update(float deltaTime);
   void create(Model m_model, GLuint m_program, const std::string assetsPath);
+
+  void paint(GLint colorLocation, GLint modelMatrixLocation, Model m_model);
 };
 
 #endif

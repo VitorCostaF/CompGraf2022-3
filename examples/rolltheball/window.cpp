@@ -183,72 +183,18 @@ void Window::onPaint() {
   // ballPosition, que será atualizada conforme apertamos as setas. Também
   // estamos usando uma escala para diminuir a bola senão ela ficaria do tamanho
   // da tela devido a normalização, função standardize() da classe model.
-  glm::mat4 model{1.0f};
-  model = glm::translate(model, ball.ballPosition);
-  model = glm::scale(model, glm::vec3(ball.ballScale));
 
-  abcg::glUniformMatrix4fv(m_modelMatrixLocation, 1, GL_FALSE, &model[0][0]);
-  abcg::glUniform4f(m_colorLocation, 1.0f, 1.0f, 1.0f, 1.0f);
-  m_model.render(&ball.m_indices, &ball.m_VAO);
-
-  // Desenho da parede sul. Notemos que a posição foi escolhida para alinhamento
-  // dos cantos (encontro das paredes)
-  model = glm::mat4(1.0);
-  model = glm::translate(model, glm::vec3{0.0f, 0.2f, 0.96f});
-
-  abcg::glUniformMatrix4fv(m_modelMatrixLocation, 1, GL_FALSE, &model[0][0]);
-  abcg::glUniform4f(m_colorLocation, 1.0f, 0.8f, 0.0f, 1.0f);
-
-  m_model.render(&wall.m_indices, &wall.m_VAO);
-
-  // Desenho da parede norte. A posição z tem a mesma lógica da anterior, porém
-  // refletida em relação a origem
-  model = glm::mat4(1.0);
-  model = glm::translate(model, glm::vec3{0.0f, 0.2f, -0.96f});
-
-  abcg::glUniformMatrix4fv(m_modelMatrixLocation, 1, GL_FALSE, &model[0][0]);
-  abcg::glUniform4f(m_colorLocation, 1.0f, 0.8f, 0.0f, 1.0f);
-
-  m_model.render(&wall.m_indices, &wall.m_VAO);
-
-  // Desenho da parede leste. A lógica da coordenada z das paredes anteriores
-  // foi aplicada na coordenada x dessa parede
-  model = glm::mat4(1.0);
-  model = glm::translate(model, glm::vec3{0.96f, 0.2f, 0.0f});
-  model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(0, 1, 0));
-
-  abcg::glUniformMatrix4fv(m_modelMatrixLocation, 1, GL_FALSE, &model[0][0]);
-  abcg::glUniform4f(m_colorLocation, 1.0f, 0.8f, 0.0f, 1.0f);
-
-  m_model.render(&wall.m_indices, &wall.m_VAO);
-
-  // Desenho da parede oeste. Mesma lógica da parede anterior para a coordenada
-  // x, porém refletida pela origem.
-  model = glm::mat4(1.0);
-  model = glm::translate(model, glm::vec3{-0.96f, 0.2f, 0.0f});
-  model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(0, 1, 0));
-
-  abcg::glUniformMatrix4fv(m_modelMatrixLocation, 1, GL_FALSE, &model[0][0]);
-  abcg::glUniform4f(m_colorLocation, 1.0f, 0.8f, 0.0f, 1.0f);
-
-  m_model.render(&wall.m_indices, &wall.m_VAO);
-
+  // Desenho da bolinha
+  ball.paint(m_colorLocation, m_modelMatrixLocation, m_model);
+  // Desenho das paredes
+  wall.paint(m_colorLocation, m_modelMatrixLocation, m_model);
+  // Desenho das caixas
   for (int i = 0; i < (int)boxes.size(); i++) {
     Box box = boxes.at(i);
     if (!box.colision) {
-      model = glm::mat4(1.0);
-      model = glm::translate(model, box.boxPosition);
-      model = glm::scale(model, glm::vec3(box.boxScale));
-      model = glm::rotate(model, box.angle, box.rotationAxis);
-
-      abcg::glUniformMatrix4fv(m_modelMatrixLocation, 1, GL_FALSE,
-                               &model[0][0]);
-      abcg::glUniform4f(m_colorLocation, 1.0f, 0.498f, 0.3137f, 1.0f);
-
-      m_model.render(&box.m_indices, &box.m_VAO);
+      box.paint(m_colorLocation, m_modelMatrixLocation, m_model);
     }
   }
-
   // Desenho chão
   m_ground.paint();
 

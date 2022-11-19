@@ -16,3 +16,16 @@ void Ball::update(float deltaTime) {
   ballPosition.z += verticalSpeed * deltaTime;
   ballPosition.x += horizontalSpeed * deltaTime;
 }
+
+void Ball::paint(GLint colorLocation, GLint modelMatrixLocation,
+                 Model m_model) {
+  // Aqui transladamos a bola para sua posição e aplicamos a escala.
+  glm::mat4 model{1.0f};
+  model = glm::translate(model, ballPosition);
+  model = glm::scale(model, glm::vec3(ballScale));
+
+  // Vínculo da matriz e da cor bem como renderização dos pontos.
+  abcg::glUniformMatrix4fv(modelMatrixLocation, 1, GL_FALSE, &model[0][0]);
+  abcg::glUniform4f(colorLocation, 1.0f, 1.0f, 1.0f, 1.0f);
+  m_model.render(&m_indices, &m_VAO);
+}
