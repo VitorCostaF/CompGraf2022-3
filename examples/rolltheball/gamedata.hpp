@@ -3,7 +3,7 @@
 
 #include <bitset>
 
-enum class State { Playing, GameOver, Win };
+enum class State { Playing, GameOver, Win, Restarted };
 
 struct GameData {
   State m_state{State::Playing};

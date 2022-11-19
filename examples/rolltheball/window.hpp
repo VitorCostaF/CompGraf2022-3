@@ -56,10 +56,12 @@ private:
 
   void loadModelFromFile(std::string_view path);
   void checkWallColision();
-  void randomizeBox(Box &box);
+  void randomizeBox(Box *box);
   bool checkBoxValidPosition(Box newBox);
   void checkBoxColision();
-  void checkActiveBoxes();
+  int checkActiveBoxes();
+  void restart();
+  const std::string assetsPath1;
 };
 
 #endif

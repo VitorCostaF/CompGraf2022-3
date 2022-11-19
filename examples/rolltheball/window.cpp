@@ -3,6 +3,7 @@
 
 #include <glm/gtc/random.hpp>
 #include <glm/gtx/fast_trigonometry.hpp>
+#include <string>
 #include <unordered_map>
 
 // Explicit specialization of std::hash for Vertex
@@ -32,6 +33,12 @@ void Window::onEvent(SDL_Event const &event) {
     }
     if (event.key.keysym.sym == SDLK_RIGHT || event.key.keysym.sym == SDLK_d) {
       ball.horizontalSpeed = 1.0f;
+    }
+    if (event.key.keysym.sym == SDLK_RETURN) {
+      if (m_gameData.m_state == State::GameOver ||
+          m_gameData.m_state == State::Win) {
+        m_gameData.m_state = State::Restarted;
+      }
     }
   }
   // Nessa seguanda parte, ao soltarmos a tecla apertada, seja para cima ou para
@@ -78,8 +85,6 @@ void Window::onCreate() {
   auto const seed{std::chrono::steady_clock::now().time_since_epoch().count()};
   m_randomEngine.seed(seed);
 
-  m_gameData.m_state = State::Playing;
-
   // Colorimos o back ground de azul para simular o ceu
   abcg::glClearColor(0.2f, 0.9f, 1.0f, 1);
 
@@ -106,19 +111,16 @@ void Window::onCreate() {
                   &wall.m_indices, &wall.m_VBO, &wall.m_EBO);
 
   m_model.setupVAO(m_program, &wall.m_VBO, &wall.m_EBO, &wall.m_VAO);
-  int i = 0;
-  while (i < qtdBoxes) {
+
+  for (int i = 0; i < qtdBoxes; i++) {
     Box box;
     m_model.loadObj(assetsPath + "box.obj", &box.m_vertices, &box.m_indices,
                     &box.m_VBO, &box.m_EBO);
 
     m_model.setupVAO(m_program, &box.m_VBO, &box.m_EBO, &box.m_VAO);
-    randomizeBox(box);
-    if (!checkBoxValidPosition(box)) {
-      boxes.emplace_back(box);
-      i++;
-    }
+    boxes.emplace_back(box);
   }
+  restart();
   // Get location of uniform variables
   m_viewMatrixLocation = abcg::glGetUniformLocation(m_program, "viewMatrix");
   m_projMatrixLocation = abcg::glGetUniformLocation(m_program, "projMatrix");
@@ -136,31 +138,32 @@ bool Window::checkBoxValidPosition(Box newBox) {
     auto const distance{glm::distance(box.boxPosition, newBox.boxPosition)};
     auto const ballDistance{
         glm::distance(newBox.boxPosition, ball.ballPosition)};
-    if (distance < 4 * box.boxScale ||
-        ballDistance < 2 * (box.boxScale + ball.ballScale)) {
+    if ((distance < 4 * box.boxScale ||
+         ballDistance < 2 * (box.boxScale + ball.ballScale)) &&
+        distance != 0) {
       return true;
     }
   }
   return false;
 }
 
-void Window::randomizeBox(Box &box) {
+void Window::randomizeBox(Box *box) {
   // Aqui vamos sortear aleatoriamente a posição das boxes, distPos, e o
   // movimento angular em torno do eixo de rotação, também sorteado
   // aleatoriamente.
 
   // Sorteamos a posição entre -0.9 e 0.9 para as boxes não seírem dos limites
   // do jogo.
+  Box te = *box;
   std::uniform_real_distribution<float> distPos(-0.8f, 0.8f);
-
   // Sorteamos uma velocidade angular para a box girar em torno do eixo.
   std::uniform_real_distribution<float> angularSpeed(90.0f, 360.0f);
-  box.boxPosition =
+  box->boxPosition =
       glm::vec3(distPos(m_randomEngine), 0.2f, distPos(m_randomEngine));
 
-  box.angularSpeed = angularSpeed(m_randomEngine);
+  box->angularSpeed = angularSpeed(m_randomEngine);
   // Random rotation axis
-  box.rotationAxis = glm::sphericalRand(1.0f);
+  box->rotationAxis = glm::sphericalRand(1.0f);
 }
 
 void Window::onPaint() {
@@ -239,15 +242,18 @@ void Window::onPaint() {
 
   for (int i = 0; i < (int)boxes.size(); i++) {
     Box box = boxes.at(i);
-    model = glm::mat4(1.0);
-    model = glm::translate(model, box.boxPosition);
-    model = glm::scale(model, glm::vec3(box.boxScale));
-    model = glm::rotate(model, box.angle, box.rotationAxis);
+    if (!box.colision) {
+      model = glm::mat4(1.0);
+      model = glm::translate(model, box.boxPosition);
+      model = glm::scale(model, glm::vec3(box.boxScale));
+      model = glm::rotate(model, box.angle, box.rotationAxis);
 
-    abcg::glUniformMatrix4fv(m_modelMatrixLocation, 1, GL_FALSE, &model[0][0]);
-    abcg::glUniform4f(m_colorLocation, 1.0f, 0.498f, 0.3137f, 1.0f);
+      abcg::glUniformMatrix4fv(m_modelMatrixLocation, 1, GL_FALSE,
+                               &model[0][0]);
+      abcg::glUniform4f(m_colorLocation, 1.0f, 0.498f, 0.3137f, 1.0f);
 
-    m_model.render(&box.m_indices, &box.m_VAO);
+      m_model.render(&box.m_indices, &box.m_VAO);
+    }
   }
 
   // Desenho chão
@@ -259,7 +265,8 @@ void Window::onPaint() {
 void Window::onPaintUI() {
   abcg::OpenGLWindow::onPaintUI();
 
-  if (m_gameData.m_state != State::Playing) {
+  if (m_gameData.m_state != State::Playing &&
+      m_gameData.m_state != State::Restarted) {
     auto const size{ImVec2(350, 300)};
     auto const position{ImVec2((m_viewportSize.x - size.x) / 2.0f,
                                (m_viewportSize.y - size.y) / 2.0f)};
@@ -302,6 +309,20 @@ void Window::onResize(glm::ivec2 const &size) {
   m_camera.computeProjectionMatrix(size);
 }
 
+void Window::restart() {
+  m_gameData.m_state = State::Playing;
+  timeElapsed = 0;
+  int i = 0;
+  while (i < qtdBoxes) {
+    Box *box = &boxes.at(i);
+    randomizeBox(box);
+    if (!checkBoxValidPosition(*box)) {
+      box->colision = false;
+      i++;
+    }
+  }
+}
+
 void Window::onDestroy() {
   m_ground.destroy();
 
@@ -312,6 +333,10 @@ void Window::onDestroy() {
 }
 
 void Window::onUpdate() {
+  if (m_gameData.m_state == State::Restarted) {
+    restart();
+    return;
+  }
   auto const deltaTime{gsl::narrow_cast<float>(getDeltaTime())};
   // Checagem da colisão com as paredes
   checkWallColision();
@@ -330,10 +355,10 @@ void Window::onUpdate() {
   }
   timeElapsed += deltaTime;
   checkBoxColision();
-  checkActiveBoxes();
+
   int remainedTime = maxTime - (int)timeElapsed;
 
-  if (boxes.size() == 0) {
+  if (checkActiveBoxes() == 0) {
     m_gameData.m_state = State::Win;
     return;
   }
@@ -343,13 +368,14 @@ void Window::onUpdate() {
   }
 }
 
-void Window::checkActiveBoxes() {
-  for (int i = 0; i < (int)boxes.size(); i++) {
-    Box box = boxes.at(i);
-    if (box.colision) {
-      boxes.erase(boxes.begin() + i);
+int Window::checkActiveBoxes() {
+  int result = 0;
+  for (auto box : boxes) {
+    if (!box.colision) {
+      result++;
     }
   }
+  return result;
 }
 
 void Window::checkBoxColision() {
