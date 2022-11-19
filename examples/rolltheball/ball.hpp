@@ -25,6 +25,7 @@ public:
   float ballScale{0.1f};
 
   void update(float deltaTime);
+  void create(Model m_model, GLuint m_program, const std::string assetsPath);
 };
 
 #endif

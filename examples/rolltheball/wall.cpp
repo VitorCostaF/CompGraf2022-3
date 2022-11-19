@@ -1,7 +1,7 @@
-#include "box.hpp"
+#include "wall.hpp"
 
-void Box::create(Model m_model, GLuint m_program,
-                 const std::string assetsPath) {
+void Wall::create(Model m_model, GLuint m_program,
+                  const std::string assetsPath) {
   // Carregamos os índices e vértices para a bola a partir do sphere.obj
   m_model.loadObj(assetsPath, &m_vertices, &m_indices, &m_VBO, &m_EBO);
 

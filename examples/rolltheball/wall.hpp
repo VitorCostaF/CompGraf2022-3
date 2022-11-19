@@ -19,6 +19,8 @@ public:
 
   std::vector<Vertex> m_vertices;
   std::vector<GLuint> m_indices;
+
+  void create(Model m_model, GLuint m_program, const std::string assetsPath);
 };
 
 #endif

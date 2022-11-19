@@ -20,7 +20,7 @@ void Window::onEvent(SDL_Event const &event) {
   // velocidade vertical da bolinha para ela se mover para cima ou para baixo ao
   // longo do eixo z. Se apertamos para a direta (ou d) ou para a esquerda (ou
   // a) mexemos na velocidade horizontal da bolinha para se deslocar ao longo do
-  // eixo x.
+  // eixo x. Também utilizamos o botão Enter para restartar o jogo.
   if (event.type == SDL_KEYDOWN) {
     if (event.key.keysym.sym == SDLK_UP || event.key.keysym.sym == SDLK_w) {
       ball.verticalSpeed = -1.0f;
@@ -100,26 +100,19 @@ void Window::onCreate() {
   // Inicializamos os buffers para o chão
   m_ground.create(m_program);
 
-  // Carregamos os índices e vértices para a bola a partir do sphere.obj
-  m_model.loadObj(assetsPath + "sphere.obj", &ball.m_vertices, &ball.m_indices,
-                  &ball.m_VBO, &ball.m_EBO);
+  // Carregamos os indices, vertices e montamos o VAO, VBO e EBO para a bola
+  ball.create(m_model, m_program, assetsPath + "sphere.obj");
+  // Carregamos os indices, vertices e montamos o VAO, VBO e EBO para a parede
+  wall.create(m_model, m_program, assetsPath + "rectangle.obj");
 
-  // Inicializamos os buffers para a bola
-  m_model.setupVAO(m_program, &ball.m_VBO, &ball.m_EBO, &ball.m_VAO);
-
-  m_model.loadObj(assetsPath + "rectangle.obj", &wall.m_vertices,
-                  &wall.m_indices, &wall.m_VBO, &wall.m_EBO);
-
-  m_model.setupVAO(m_program, &wall.m_VBO, &wall.m_EBO, &wall.m_VAO);
-
+  // Carregamos os indices, vertices e montamos o VAO, VBO e EBO para as boxes e
+  // colocamos na lista de boxes
   for (int i = 0; i < qtdBoxes; i++) {
     Box box;
-    m_model.loadObj(assetsPath + "box.obj", &box.m_vertices, &box.m_indices,
-                    &box.m_VBO, &box.m_EBO);
-
-    m_model.setupVAO(m_program, &box.m_VBO, &box.m_EBO, &box.m_VAO);
+    box.create(m_model, m_program, assetsPath + "box.obj");
     boxes.emplace_back(box);
   }
+  // Inicializamos as variáveis necessárias
   restart();
   // Get location of uniform variables
   m_viewMatrixLocation = abcg::glGetUniformLocation(m_program, "viewMatrix");
@@ -133,7 +126,9 @@ bool Window::checkBoxValidPosition(Box newBox) {
   // da bola. Usamos a boxScale e callScale, pois esses objetos foram
   // normalizados e então a escala representa o raio do circulo com centro no
   // objeto. Porém, multiplicamos pelos fatores 4 e 2 para deixar uma distância
-  // maior entre os objetos.
+  // maior entre os objetos. Além disso checamos se não for zero, pois
+  // reaproveitamos o vetor boxes no momento do restart então distância zero diz
+  // que estamos comparando ele com ele mesmo.
   for (auto box : boxes) {
     auto const distance{glm::distance(box.boxPosition, newBox.boxPosition)};
     auto const ballDistance{
@@ -154,15 +149,13 @@ void Window::randomizeBox(Box *box) {
 
   // Sorteamos a posição entre -0.9 e 0.9 para as boxes não seírem dos limites
   // do jogo.
-  Box te = *box;
   std::uniform_real_distribution<float> distPos(-0.8f, 0.8f);
   // Sorteamos uma velocidade angular para a box girar em torno do eixo.
   std::uniform_real_distribution<float> angularSpeed(90.0f, 360.0f);
   box->boxPosition =
       glm::vec3(distPos(m_randomEngine), 0.2f, distPos(m_randomEngine));
-
   box->angularSpeed = angularSpeed(m_randomEngine);
-  // Random rotation axis
+  // Sorteamos também o angulo de rotação
   box->rotationAxis = glm::sphericalRand(1.0f);
 }
 

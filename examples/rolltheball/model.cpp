@@ -13,7 +13,11 @@ template <> struct std::hash<Vertex> {
 void Model::createBuffers(std::vector<Vertex> *m_vertices,
                           std::vector<GLuint> *m_indices, GLuint *m_VBO,
                           GLuint *m_EBO) {
-  // Delete previous buffers
+
+  // Aqui não houve muita mexida em relação ao model presente nas notas de aula
+  // Delete previous buffers. A única modificação foi a inclusão de ponteiros
+  // aos objetos que essa função preenche para deixar esse metodo de criação
+  // genérico e para que ele preencha mais de um objeto.
   abcg::glDeleteBuffers(1, m_EBO);
   abcg::glDeleteBuffers(1, m_VBO);
 
@@ -38,7 +42,8 @@ void Model::loadObj(std::string_view path, std::vector<Vertex> *m_vertices,
                     std::vector<GLuint> *m_indices, GLuint *m_VBO,
                     GLuint *m_EBO, bool standardize) {
   tinyobj::ObjReader reader;
-
+  // Igual ao método anterior este foi reaproveitado das notas de aula com as
+  // alterações dos ponteiros para torná-lo génerico
   if (!reader.ParseFromFile(path.data())) {
     if (!reader.Error().empty()) {
       throw abcg::RuntimeError(
@@ -96,6 +101,8 @@ void Model::loadObj(std::string_view path, std::vector<Vertex> *m_vertices,
 
 void Model::render(std::vector<GLuint> *m_indices, GLuint *m_VAO,
                    int numTriangles) const {
+  // Igual ao método anterior este foi reaproveitado das notas de aula com as
+  // alterações dos ponteiros para torná-lo génerico
   abcg::glBindVertexArray(*m_VAO);
 
   auto const numIndices{(numTriangles < 0) ? (*m_indices).size()
@@ -108,6 +115,8 @@ void Model::render(std::vector<GLuint> *m_indices, GLuint *m_VAO,
 
 void Model::setupVAO(GLuint program, GLuint *m_VBO, GLuint *m_EBO,
                      GLuint *m_VAO) {
+  // Igual ao método anterior este foi reaproveitado das notas de aula com as
+  // alterações dos ponteiros para torná-lo génerico
   // Release previous VAO
   abcg::glDeleteVertexArrays(1, m_VAO);
 
@@ -135,7 +144,8 @@ void Model::setupVAO(GLuint program, GLuint *m_VBO, GLuint *m_EBO,
 
 void Model::standardize(std::vector<Vertex> *m_vertices) {
   // Center to origin and normalize largest bound to [-1, 1]
-
+  // Igual ao método anterior este foi reaproveitado das notas de aula com as
+  // alterações dos ponteiros para torná-lo génerico
   // Get bounds
   glm::vec3 max(std::numeric_limits<float>::lowest());
   glm::vec3 min(std::numeric_limits<float>::max());
@@ -153,6 +163,8 @@ void Model::standardize(std::vector<Vertex> *m_vertices) {
 }
 
 void Model::destroy(GLuint *m_VBO, GLuint *m_EBO, GLuint *m_VAO) const {
+  // Igual ao método anterior este foi reaproveitado das notas de aula com as
+  // alterações dos ponteiros para torná-lo génerico
   abcg::glDeleteBuffers(1, m_EBO);
   abcg::glDeleteBuffers(1, m_VBO);
   abcg::glDeleteVertexArrays(1, m_VAO);

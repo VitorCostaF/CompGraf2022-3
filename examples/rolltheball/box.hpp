@@ -27,6 +27,7 @@ public:
   bool colision{false};
 
   void update(float deltaTime);
+  void create(Model m_model, GLuint m_program, const std::string assetsPath);
 };
 
 #endif
