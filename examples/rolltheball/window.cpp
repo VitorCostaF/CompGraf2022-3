@@ -203,20 +203,38 @@ void Window::onPaint() {
 
 void Window::onPaintUI() {
   abcg::OpenGLWindow::onPaintUI();
+  // Aqui criamos uma nova telinhas para exibirmos os textos do jogo
+  auto const size{ImVec2(350, 300)};
+  ImVec2 position;
 
-  //
+  // Jo o jogo não estiver rolando exibimos o texo te vitória ou derrota no meio
+  // da tela
   if (m_gameData.m_state != State::Playing &&
       m_gameData.m_state != State::Restarted) {
-    auto const size{ImVec2(350, 300)};
-    auto const position{ImVec2((m_viewportSize.x - size.x) / 2.0f,
-                               (m_viewportSize.y - size.y) / 2.0f)};
-    ImGui::SetNextWindowPos(position);
-    ImGui::SetNextWindowSize(size);
-    ImGuiWindowFlags const flags{ImGuiWindowFlags_NoBackground |
-                                 ImGuiWindowFlags_NoTitleBar |
-                                 ImGuiWindowFlags_NoInputs};
-    ImGui::Begin(" ", nullptr, flags);
-    ImGui::PushFont(m_font);
+
+    position = ImVec2((m_viewportSize.x - size.x) / 2.0f,
+                      (m_viewportSize.y - size.y) / 2.0f);
+  } else {
+    // Se o jogo estiver rolando exibimos a contagem do tempo no topo da tela
+    position = ImVec2((m_viewportSize.x) / 2.0f - 20.0f, 0);
+  }
+
+  // Acerto da criação da tela, sem backgroud, titlebar e inputs para apenas
+  // exibir o texto
+  ImGui::SetNextWindowPos(position);
+  ImGui::SetNextWindowSize(size);
+  ImGuiWindowFlags const flags{ImGuiWindowFlags_NoBackground |
+                               ImGuiWindowFlags_NoTitleBar |
+                               ImGuiWindowFlags_NoInputs};
+
+  // Inicializamos a tela com a fonte
+  ImGui::Begin(" ", nullptr, flags);
+  ImGui::PushFont(m_font);
+  // Se o jogo acabou exibimos o texto de vitória ou derrota e a dica de apertar
+  // enter para continuar
+  if (m_gameData.m_state != State::Playing &&
+      m_gameData.m_state != State::Restarted) {
+
     if (m_gameData.m_state == State::GameOver) {
       ImGui::Text("Game Over!");
     } else {
@@ -224,35 +242,31 @@ void Window::onPaintUI() {
     }
     ImGui::Text("Press Enter");
 
-    ImGui::PopFont();
-    ImGui::End();
   } else {
-    auto const size{ImVec2(350, 300)};
-    auto const position{ImVec2((m_viewportSize.x) / 2.0f - 20.0f, 0)};
-    ImGui::SetNextWindowPos(position);
-    ImGui::SetNextWindowSize(size);
-    ImGuiWindowFlags const flags{ImGuiWindowFlags_NoBackground |
-                                 ImGuiWindowFlags_NoTitleBar |
-                                 ImGuiWindowFlags_NoInputs};
-    ImGui::Begin(" ", nullptr, flags);
-    ImGui::PushFont(m_font);
+    // Se o jogo está rolando subtraímos o tempo máximo para pegar todos os
+    // pontos pelo tempo passado para termos o tempo restante.
     int remainTime = maxTime - (int)timeElapsed;
     ImGui::Text("%d", remainTime < 0 ? 0 : remainTime);
-
-    ImGui::PopFont();
-    ImGui::End();
   }
+  ImGui::PopFont();
+  ImGui::End();
 }
 
 void Window::onResize(glm::ivec2 const &size) {
+  // Acertamos o viewPort e recomputamos a matriz de projeção
   m_viewportSize = size;
   m_camera.computeProjectionMatrix(size);
 }
 
 void Window::restart() {
+  // Aqui inicializamos o estado do jogo, o tempo passado.
   m_gameData.m_state = State::Playing;
   timeElapsed = 0;
   int i = 0;
+  // Para cada box sorteamos seus atributos (posição, eixo e velocidade de
+  // rotação), verificamos se não está conflitando com outra box e acertamos a
+  // colisão dessa box. Só contamos, avançamos o valor de i, quando conseguimos
+  // uma posição válida.
   while (i < qtdBoxes) {
     Box *box = &boxes.at(i);
     randomizeBox(box);
@@ -264,8 +278,8 @@ void Window::restart() {
 }
 
 void Window::onDestroy() {
+  // Liberação dos recursos
   m_ground.destroy();
-
   abcg::glDeleteProgram(m_program);
   abcg::glDeleteBuffers(1, &m_EBO);
   abcg::glDeleteBuffers(1, &m_VBO);
@@ -273,36 +287,49 @@ void Window::onDestroy() {
 }
 
 void Window::onUpdate() {
+  // Se o jogo acabou ainda assim permitimos que a bolinha se movimente.
+  // Se foi apertado enter após o fim do jogo restarmos o jogo.
   if (m_gameData.m_state == State::Restarted) {
     restart();
     return;
   }
   auto const deltaTime{gsl::narrow_cast<float>(getDeltaTime())};
-  // Checagem da colisão com as paredes
+  // Checagem da colisão com as paredes, limites do jogo.
   checkWallColision();
-  // Update LookAt camera
-  m_camera.move(ball.ballPosition);
-  // Update
+
+  // Atualizamos os parâmetros da bola.
   ball.update(deltaTime);
+  // Acertamos o ponto que a câmera olha para que ela acompanhe a bola.
+  m_camera.move(ball.ballPosition);
 
   for (auto &box : boxes) {
+    // Rodamos as boxes por sua velocidade angular, por isso precisamos
+    // atualização o ângulo.
     box.angle =
         glm::wrapAngle(box.angle + glm::radians(box.angularSpeed) * deltaTime);
   }
 
+  // Se o jogo acabou não fazemos o resto
   if (m_gameData.m_state != State::Playing) {
     return;
   }
+
+  // Somamos o tempo passado desde o início para usar depois
   timeElapsed += deltaTime;
+  // Checamos se a bolinha atingiu alguma box.
   checkBoxColision();
 
+  // Calculamos o tempo restante subtraindo o tempo máximo do tempo passado.
   int remainedTime = maxTime - (int)timeElapsed;
 
+  // Checamos se ainda hã alguma box sem colisão. Se todas já foram "pegas"
+  // então o jogador ganhou
   if (checkActiveBoxes() == 0) {
     m_gameData.m_state = State::Win;
     return;
   }
 
+  // Se o tempo chegou a zero o jogador perdeu
   if (remainedTime <= 0) {
     m_gameData.m_state = State::GameOver;
   }
@@ -310,6 +337,8 @@ void Window::onUpdate() {
 
 int Window::checkActiveBoxes() {
   int result = 0;
+  // Para cada box checamos se não foi colidida, ou pega, pela bolinha e
+  // contamos como ativa.
   for (auto box : boxes) {
     if (!box.colision) {
       result++;
@@ -319,6 +348,8 @@ int Window::checkActiveBoxes() {
 }
 
 void Window::checkBoxColision() {
+  // Função para saber se a bolinha colidiu com alguma box. Deixamos um fator
+  // 0.5 para permitir uma sobreposição maior
   for (auto &box : boxes) {
     auto const ballDistance{glm::distance(box.boxPosition, ball.ballPosition)};
 
@@ -329,6 +360,9 @@ void Window::checkBoxColision() {
 }
 
 void Window::checkWallColision() {
+  // Como as paredes estão fixas basicamente precisamos checar se a bolinha não
+  // passou dos limites e zeramos a velocidade naquela direção para simular uma
+  // batida.
   if ((ball.ballPosition.x > 0.85f && ball.horizontalSpeed > 0) ||
       (ball.ballPosition.x < -0.85f && ball.horizontalSpeed < 0)) {
     ball.horizontalSpeed = 0.0f;
