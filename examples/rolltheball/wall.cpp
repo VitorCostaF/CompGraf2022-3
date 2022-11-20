@@ -33,7 +33,8 @@ void Wall::paint(GLuint colorLocation, GLuint modelMatrixLocation,
   m_model.render(&m_indices, &m_VAO);
 
   // Desenho da parede leste. A lógica da coordenada z das paredes anteriores
-  // foi aplicada na coordenada x dessa parede
+  // foi aplicada na coordenada x dessa parede e também rodamos em -90.0 graus
+  // para formar a parede lateral.
   model = glm::mat4(1.0);
   model = glm::translate(model, glm::vec3{0.96f, 0.2f, 0.0f});
   model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(0, 1, 0));
@@ -52,5 +53,6 @@ void Wall::paint(GLuint colorLocation, GLuint modelMatrixLocation,
   abcg::glUniformMatrix4fv(modelMatrixLocation, 1, GL_FALSE, &model[0][0]);
   abcg::glUniform4f(colorLocation, 1.0f, 0.8f, 0.0f, 1.0f);
 
+  // Renderização feita pela classe Model
   m_model.render(&m_indices, &m_VAO);
 }

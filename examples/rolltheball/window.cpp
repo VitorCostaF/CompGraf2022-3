@@ -204,6 +204,7 @@ void Window::onPaint() {
 void Window::onPaintUI() {
   abcg::OpenGLWindow::onPaintUI();
 
+  //
   if (m_gameData.m_state != State::Playing &&
       m_gameData.m_state != State::Restarted) {
     auto const size{ImVec2(350, 300)};

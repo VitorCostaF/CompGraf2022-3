@@ -21,5 +21,6 @@ void Box::paint(GLint colorLocation, GLint modelMatrixLocation, Model m_model) {
   // A cor da box será um laranja.
   abcg::glUniform4f(colorLocation, 1.0f, 0.498f, 0.3137f, 1.0f);
 
+  // Usamos a classe model para renderizar o objeto
   m_model.render(&m_indices, &m_VAO);
 }
