@@ -4,6 +4,7 @@
 #include "abcgOpenGL.hpp"
 
 #include "model.hpp"
+#include <glm/gtx/fast_trigonometry.hpp>
 
 class Ball {
 public:
@@ -16,6 +17,7 @@ public:
   GLuint m_EBO{};
 
   glm::vec3 ballPosition{0.0f, 0.2f, 0.0f};
+  glm::vec3 rotationAxis{};
 
   std::vector<Vertex> m_vertices;
   std::vector<GLuint> m_indices;
@@ -23,6 +25,8 @@ public:
   float verticalSpeed{};
   float horizontalSpeed{};
   float ballScale{0.1f};
+  float angle{};
+  float angularSpeed{90.0f};
 
   void update(float deltaTime);
   void create(Model m_model, GLuint m_program, const std::string assetsPath);
