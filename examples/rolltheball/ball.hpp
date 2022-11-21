@@ -17,7 +17,7 @@ public:
   GLuint m_EBO{};
 
   glm::vec3 ballPosition{0.0f, 0.2f, 0.0f};
-  glm::vec3 rotationAxis{};
+  glm::vec3 rotationAxis{1.0f, 0.0f, 0.0f};
 
   std::vector<Vertex> m_vertices;
   std::vector<GLuint> m_indices;
@@ -26,7 +26,7 @@ public:
   float horizontalSpeed{};
   float ballScale{0.1f};
   float angle{};
-  float angularSpeed{90.0f};
+  float angularSpeed{180.0f};
 
   void update(float deltaTime);
   void create(Model m_model, GLuint m_program, const std::string assetsPath);
