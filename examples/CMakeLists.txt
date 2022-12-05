@@ -9,4 +9,6 @@
  add_subdirectory(lookat)
 # add_subdirectory(starfield)
 # add_subdirectory(viewer1)
-add_subdirectory(rolltheball)
+ add_subdirectory(viewer3)
+# add_subdirectory(rolltheball)
+add_subdirectory(rolltheball2)
