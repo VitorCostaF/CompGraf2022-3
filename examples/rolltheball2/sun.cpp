@@ -41,7 +41,6 @@ void Sun::update(float deltaTime) {
   // Aqui vamos decrementando a componente verde da cor para ir de amarelo para
   // o laranja enquanto o sol se move.
   sunColor.g -= deltaTime / 30;
-  fmt::print("g {}\n", sunColor.g);
 }
 
 void Sun::restart() {
