@@ -16,14 +16,15 @@ public:
   GLuint m_EBO{};
 
   glm::vec3 sunPosition{-6.0f, 0.0f, -6.5f};
-  glm::vec4 sunColor{1.0f, 0.9764f, 0.0f, 1.0f};
+  glm::vec4 sunColor{1.0f, 1.0f, 0.0f, 1.0f};
 
   std::vector<Vertex> m_vertices;
   std::vector<GLuint> m_indices;
 
-  float sunScale{1.0f};
+  float sunScale{2.0f};
 
   void update(float deltaTime);
+  void restart();
   void create(Model m_model, GLuint m_program, const std::string assetsPath);
   void paint(GLint colorLocation, GLint modelMatrixLocation, Model m_model);
 };

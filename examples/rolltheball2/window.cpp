@@ -293,6 +293,8 @@ void Window::restart() {
       i++;
     }
   }
+
+  sun.restart();
 }
 
 void Window::onDestroy() {
@@ -351,6 +353,8 @@ void Window::onUpdate() {
   if (remainedTime <= 0) {
     m_gameData.m_state = State::GameOver;
   }
+
+  sun.update(deltaTime);
 }
 
 int Window::checkActiveBoxes() {
