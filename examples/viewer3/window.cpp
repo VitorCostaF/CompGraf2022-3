@@ -121,7 +121,7 @@ void Window::onPaint() {
 
   model = glm::mat4{1.0f};
   model = glm::scale(model, glm::vec3(0.5f));
-  model = glm::translate(model, glm::vec3{-1, -1, 0});
+  model = glm::translate(model, glm::vec3{-1.5, -1.5, 0});
   m_modelMatrix = m_modelMatrix * model;
   abcg::glUniformMatrix4fv(modelMatrixLoc, 1, GL_FALSE, &m_modelMatrix[0][0]);
 
