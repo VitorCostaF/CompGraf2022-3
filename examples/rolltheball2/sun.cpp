@@ -3,19 +3,21 @@
 
 void Sun::create(Model m_model, const std::string assetsPath) {
 
-  // Criação do program com o .vert e .frag específicos
+  // Criação do program com o .vert e .frag específicos para o sol, pois ele não
+  // será afetado pela iluminação, uma vez que ele seria a fonte de luz
   sunProgram = abcg::createOpenGLProgram(
       {{.source = assetsPath + "sun.vert", .stage = abcg::ShaderStage::Vertex},
        {.source = assetsPath + "sun.frag",
         .stage = abcg::ShaderStage::Fragment}});
 
-  // Carregamos os índices e vértices para a bola a partir do sphere.obj
+  // Carregamos os índices e vértices para o sol a partir do sphere.obj
   m_model.loadObj(assetsPath + "sphere.obj", &m_vertices, &m_indices, &m_VBO,
                   &m_EBO);
 
-  // Inicializamos os buffers para a bola
+  // Inicializamos os buffers para o sol
   m_model.setupVAO(sunProgram, &m_VBO, &m_EBO, &m_VAO);
 
+  // Iniciamos as localizações das variáveis uniformes
   sunViewMatrixLocation = abcg::glGetUniformLocation(sunProgram, "viewMatrix");
   sunProjMatrixLocation = abcg::glGetUniformLocation(sunProgram, "projMatrix");
   sunModelMatrixLocation =
@@ -68,4 +70,11 @@ void Sun::update(float deltaTime) {
 void Sun::restart() {
   sunPosition = glm::vec3{-8.66f, 0.0f, -7.0f};
   sunColor = glm::vec4{1.0f, 01.0f, 0.0f, 1.0f};
+}
+
+void Sun::destroy() {
+  abcg::glDeleteProgram(sunProgram);
+  abcg::glDeleteBuffers(1, &m_EBO);
+  abcg::glDeleteBuffers(1, &m_VBO);
+  abcg::glDeleteVertexArrays(1, &m_VAO);
 }

@@ -33,6 +33,7 @@ public:
   void restart();
   void create(Model m_model, const std::string assetsPath);
   void paint(glm::mat4 viewMatrix, glm::mat4 projMatrix, Model m_model);
+  void destroy();
 };
 
 #endif

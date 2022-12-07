@@ -15,6 +15,12 @@ public:
   GLuint m_VAO{};
   GLuint m_VBO{};
   GLuint m_EBO{};
+  GLuint ballProgram{};
+
+  GLint ballViewMatrixLocation{};
+  GLint ballProjMatrixLocation{};
+  GLint ballModelMatrixLocation{};
+  GLint ballColorLocation{};
 
   glm::vec3 ballPosition{0.0f, 0.2f, 0.0f};
   glm::vec3 rotationAxis{1.0f, 0.0f, 0.0f};
@@ -29,9 +35,9 @@ public:
   float angularSpeed{180.0f};
 
   void update(float deltaTime);
-  void create(Model m_model, GLuint m_program, const std::string assetsPath);
+  void create(Model m_model, const std::string assetsPath);
 
-  void paint(GLint colorLocation, GLint modelMatrixLocation, Model m_model);
+  void paint(glm::mat4 viewMatrix, glm::mat4 projMatrix, Model m_model);
 };
 
 #endif

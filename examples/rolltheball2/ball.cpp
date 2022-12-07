@@ -1,13 +1,29 @@
 #include "ball.hpp"
 #include <glm/fwd.hpp>
 
-void Ball::create(Model m_model, GLuint m_program,
-                  const std::string assetsPath) {
+void Ball::create(Model m_model, const std::string assetsPath) {
+
+  // Criação do program para a bola
+  ballProgram = abcg::createOpenGLProgram(
+      {{.source = assetsPath + "ball.vert", .stage = abcg::ShaderStage::Vertex},
+       {.source = assetsPath + "ball.frag",
+        .stage = abcg::ShaderStage::Fragment}});
+
   // Carregamos os índices e vértices para a bola a partir do sphere.obj
-  m_model.loadObj(assetsPath, &m_vertices, &m_indices, &m_VBO, &m_EBO);
+  m_model.loadObj(assetsPath + "sphere.obj", &m_vertices, &m_indices, &m_VBO,
+                  &m_EBO);
 
   // Inicializamos os buffers para a bola
-  m_model.setupVAO(m_program, &m_VBO, &m_EBO, &m_VAO);
+  m_model.setupVAO(ballProgram, &m_VBO, &m_EBO, &m_VAO);
+
+  // Iniciamos as localizações das variáveis uniformes
+  ballViewMatrixLocation =
+      abcg::glGetUniformLocation(ballProgram, "viewMatrix");
+  ballProjMatrixLocation =
+      abcg::glGetUniformLocation(ballProgram, "projMatrix");
+  ballModelMatrixLocation =
+      abcg::glGetUniformLocation(ballProgram, "modelMatrix");
+  ballColorLocation = abcg::glGetUniformLocation(ballProgram, "color");
 }
 
 void Ball::update(float deltaTime) {
@@ -30,8 +46,16 @@ void Ball::update(float deltaTime) {
   }
 }
 
-void Ball::paint(GLint colorLocation, GLint modelMatrixLocation,
-                 Model m_model) {
+void Ball::paint(glm::mat4 viewMatrix, glm::mat4 projMatrix, Model m_model) {
+
+  // Ativação do program e bind das matrizes de projeção e view
+  abcg::glUseProgram(ballProgram);
+
+  abcg::glUniformMatrix4fv(ballViewMatrixLocation, 1, GL_FALSE,
+                           &viewMatrix[0][0]);
+  abcg::glUniformMatrix4fv(ballProjMatrixLocation, 1, GL_FALSE,
+                           &projMatrix[0][0]);
+
   // Aqui transladamos a bola para sua posição e aplicamos a escala, bem como a
   // rodamos se pelo ângulo de rotação que depende de para onde estamos
   // movimentando. Esse rotationAxis é inicializado com (1,0,0) apenas para não
@@ -43,7 +67,9 @@ void Ball::paint(GLint colorLocation, GLint modelMatrixLocation,
   model = glm::rotate(model, angle, rotationAxis);
 
   // Vínculo da matriz e da cor bem como renderização dos pontos.
-  abcg::glUniformMatrix4fv(modelMatrixLocation, 1, GL_FALSE, &model[0][0]);
-  abcg::glUniform4f(colorLocation, 1.0f, 1.0f, 1.0f, 1.0f);
+  abcg::glUniformMatrix4fv(ballModelMatrixLocation, 1, GL_FALSE, &model[0][0]);
+  abcg::glUniform4f(ballColorLocation, 1.0f, 1.0f, 1.0f, 1.0f);
   m_model.render(&m_indices, &m_VAO);
+
+  abcg::glUseProgram(0);
 }

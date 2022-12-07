@@ -100,8 +100,10 @@ void Window::onCreate() {
   // Inicializamos os buffers para o chão
   m_ground.create(m_program);
 
-  // Carregamos os indices, vertices e montamos o VAO, VBO e EBO para a bola
-  ball.create(m_model, m_program, assetsPath + "sphere.obj");
+  // Carregamos os indices, vertices e montamos o VAO, VBO e EBO para a bola,
+  // bem como criamos o program
+  ball.create(m_model, assetsPath);
+
   // Carregamos os indices, vertices e montamos o VAO, VBO e EBO para a parede
   wall.create(m_model, m_program, assetsPath + "rectangle.obj");
 
@@ -189,8 +191,6 @@ void Window::onPaint() {
   // estamos usando uma escala para diminuir a bola senão ela ficaria do tamanho
   // da tela devido a normalização, função standardize() da classe model.
 
-  // Desenho da bolinha
-  ball.paint(m_colorLocation, m_modelMatrixLocation, m_model);
   // Desenho das paredes
   wall.paint(m_colorLocation, m_modelMatrixLocation, m_model);
   // Desenho das caixas
@@ -204,6 +204,9 @@ void Window::onPaint() {
   m_ground.paint();
 
   abcg::glUseProgram(0);
+
+  // Desenho da bolinha
+  ball.paint(m_camera.getViewMatrix(), m_camera.getProjMatrix(), m_model);
 
   // Desenho do sol
   sun.paint(m_camera.getViewMatrix(), m_camera.getProjMatrix(), m_model);
@@ -290,6 +293,7 @@ void Window::restart() {
 void Window::onDestroy() {
   // Liberação dos recursos
   m_ground.destroy();
+  sun.destroy();
   abcg::glDeleteProgram(m_program);
   abcg::glDeleteBuffers(1, &m_EBO);
   abcg::glDeleteBuffers(1, &m_VBO);
