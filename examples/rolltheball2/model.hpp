@@ -5,12 +5,15 @@
 
 struct Vertex {
   glm::vec3 position{};
+  glm::vec3 normal{};
 
   friend bool operator==(Vertex const &, Vertex const &) = default;
 };
 
 class Model {
 public:
+  bool m_hasNormals{false};
+
   void loadObj(std::string_view path, std::vector<Vertex> *m_vertices,
                std::vector<GLuint> *m_indices, GLuint *m_VBO, GLuint *m_EBO,
                bool standardize = true);
@@ -28,6 +31,9 @@ private:
                      GLuint *m_EBO);
 
   void standardize(std::vector<Vertex> *m_vertices);
+
+  void computeNormals(std::vector<Vertex> *m_vertices,
+                      std::vector<GLuint> *m_indices);
 };
 
 #endif

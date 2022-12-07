@@ -105,7 +105,7 @@ void Window::onPaint() {
   // Set uniform variables for the current model
   glm::mat4 model{1.0f};
   model = glm::translate(model, glm::vec3{0, 0, 0});
-  model = glm::scale(model, glm::vec3(0.5f));
+  model = glm::scale(model, glm::vec3(0.1f));
   m_modelMatrix = m_modelMatrix * model;
   abcg::glUniformMatrix4fv(modelMatrixLoc, 1, GL_FALSE, &m_modelMatrix[0][0]);
   abcg::glUniform4fv(KaLoc, 1, &m_Ka.x);

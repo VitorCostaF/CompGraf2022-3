@@ -10,7 +10,8 @@
 template <> struct std::hash<Vertex> {
   size_t operator()(Vertex const &vertex) const noexcept {
     auto const h1{std::hash<glm::vec3>()(vertex.position)};
-    return h1;
+    auto const h2{std::hash<glm::vec3>()(vertex.normal)};
+    return abcg::hashCombine(h1, h2);
   }
 };
 
@@ -312,7 +313,7 @@ void Window::onUpdate() {
   checkWallColision();
 
   // Atualizamos os parâmetros da bola.
-  ball.update(deltaTime);
+  ball.update(deltaTime, sun.sunColor);
   // Acertamos o ponto que a câmera olha para que ela acompanhe a bola.
   m_camera.move(ball.ballPosition);
 

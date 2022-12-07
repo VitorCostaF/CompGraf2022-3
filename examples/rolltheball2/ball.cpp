@@ -1,4 +1,5 @@
 #include "ball.hpp"
+#include "core.h"
 #include <glm/fwd.hpp>
 
 void Ball::create(Model m_model, const std::string assetsPath) {
@@ -23,10 +24,10 @@ void Ball::create(Model m_model, const std::string assetsPath) {
       abcg::glGetUniformLocation(ballProgram, "projMatrix");
   ballModelMatrixLocation =
       abcg::glGetUniformLocation(ballProgram, "modelMatrix");
-  ballColorLocation = abcg::glGetUniformLocation(ballProgram, "color");
+  // ballColorLocation = abcg::glGetUniformLocation(ballProgram, "color");
 }
 
-void Ball::update(float deltaTime) {
+void Ball::update(float deltaTime, glm::vec4 sunColor) {
   // Aqui atualizamos a posição da bolinha de acordo com verticalSpeed e
   // horizontalSpeed. Essas variáveis podem ser -1, 0 ou 1, dependendo da seta
   // que apertarmos. Usamos deltaTime para uma variação por segundo.
@@ -44,6 +45,13 @@ void Ball::update(float deltaTime) {
     angle = glm::wrapAngle(angle + glm::radians(angularSpeed) * deltaTime);
     rotationAxis = glm::vec3{verticalSpeed, 0, horizontalSpeed};
   }
+
+  // Abaixo atualizamos as propriedades de iluminação de acordo com a cor do sol
+  // para tentar representar o brilho e a cor
+
+  // A ambiente é apenas uma fração da cor de fato do sol, pois não é a luz
+  // direta mas sim simula as reflexões do resto do ambiente
+  m_Ka = sunColor * 0.1f;
 }
 
 void Ball::paint(glm::mat4 viewMatrix, glm::mat4 projMatrix, Model m_model) {
@@ -51,10 +59,31 @@ void Ball::paint(glm::mat4 viewMatrix, glm::mat4 projMatrix, Model m_model) {
   // Ativação do program e bind das matrizes de projeção e view
   abcg::glUseProgram(ballProgram);
 
-  abcg::glUniformMatrix4fv(ballViewMatrixLocation, 1, GL_FALSE,
-                           &viewMatrix[0][0]);
-  abcg::glUniformMatrix4fv(ballProjMatrixLocation, 1, GL_FALSE,
-                           &projMatrix[0][0]);
+  auto const viewMatrixLoc{
+      abcg::glGetUniformLocation(ballProgram, "viewMatrix")};
+  auto const projMatrixLoc{
+      abcg::glGetUniformLocation(ballProgram, "projMatrix")};
+  auto const modelMatrixLoc{
+      abcg::glGetUniformLocation(ballProgram, "modelMatrix")};
+  auto const normalMatrixLoc{
+      abcg::glGetUniformLocation(ballProgram, "normalMatrix")};
+  auto const lightDirLoc{
+      abcg::glGetUniformLocation(ballProgram, "lightDirWorldSpace")};
+  auto const shininessLoc{abcg::glGetUniformLocation(ballProgram, "shininess")};
+  auto const IaLoc{abcg::glGetUniformLocation(ballProgram, "Ia")};
+  auto const IdLoc{abcg::glGetUniformLocation(ballProgram, "Id")};
+  auto const IsLoc{abcg::glGetUniformLocation(ballProgram, "Is")};
+  auto const KaLoc{abcg::glGetUniformLocation(ballProgram, "Ka")};
+  auto const KdLoc{abcg::glGetUniformLocation(ballProgram, "Kd")};
+  auto const KsLoc{abcg::glGetUniformLocation(ballProgram, "Ks")};
+
+  abcg::glUniformMatrix4fv(viewMatrixLoc, 1, GL_FALSE, &viewMatrix[0][0]);
+  abcg::glUniformMatrix4fv(projMatrixLoc, 1, GL_FALSE, &projMatrix[0][0]);
+
+  abcg::glUniform4fv(lightDirLoc, 1, &m_lightDir.x);
+  abcg::glUniform4fv(IaLoc, 1, &m_Ia.x);
+  abcg::glUniform4fv(IdLoc, 1, &m_Id.x);
+  abcg::glUniform4fv(IsLoc, 1, &m_Is.x);
 
   // Aqui transladamos a bola para sua posição e aplicamos a escala, bem como a
   // rodamos se pelo ângulo de rotação que depende de para onde estamos
@@ -67,8 +96,18 @@ void Ball::paint(glm::mat4 viewMatrix, glm::mat4 projMatrix, Model m_model) {
   model = glm::rotate(model, angle, rotationAxis);
 
   // Vínculo da matriz e da cor bem como renderização dos pontos.
-  abcg::glUniformMatrix4fv(ballModelMatrixLocation, 1, GL_FALSE, &model[0][0]);
-  abcg::glUniform4f(ballColorLocation, 1.0f, 1.0f, 1.0f, 1.0f);
+  abcg::glUniformMatrix4fv(modelMatrixLoc, 1, GL_FALSE, &model[0][0]);
+  // abcg::glUniform4f(ballColorLocation, 1.0f, 1.0f, 1.0f, 1.0f);
+
+  abcg::glUniform4fv(KaLoc, 1, &m_Ka.x);
+  abcg::glUniform4fv(KdLoc, 1, &m_Kd.x);
+  abcg::glUniform4fv(KsLoc, 1, &m_Ks.x);
+  abcg::glUniform1f(shininessLoc, m_shininess);
+
+  auto const modelViewMatrix{glm::mat3(viewMatrix * model)};
+  auto const normalMatrix{glm::inverseTranspose(modelViewMatrix)};
+  abcg::glUniformMatrix3fv(normalMatrixLoc, 1, GL_FALSE, &normalMatrix[0][0]);
+
   m_model.render(&m_indices, &m_VAO);
 
   abcg::glUseProgram(0);
