@@ -97,13 +97,6 @@ void Window::onCreate() {
        {.source = assetsPath + "main.frag",
         .stage = abcg::ShaderStage::Fragment}});
 
-  // Criação do programa do sol. É um vert e frag diferente, pois o sol não será
-  // afetado pela iluminação visto que ele seria a fonte de luz
-  sunProgram = abcg::createOpenGLProgram(
-      {{.source = assetsPath + "sun.vert", .stage = abcg::ShaderStage::Vertex},
-       {.source = assetsPath + "sun.frag",
-        .stage = abcg::ShaderStage::Fragment}});
-
   // Inicializamos os buffers para o chão
   m_ground.create(m_program);
 
@@ -111,8 +104,10 @@ void Window::onCreate() {
   ball.create(m_model, m_program, assetsPath + "sphere.obj");
   // Carregamos os indices, vertices e montamos o VAO, VBO e EBO para a parede
   wall.create(m_model, m_program, assetsPath + "rectangle.obj");
-  // Carregamos os indices, vertices e montamos o VAO, VBO e EBO para o sol
-  sun.create(m_model, sunProgram, assetsPath + "sphere.obj");
+
+  // Carregamos os indices, vertices e montamos o VAO, VBO e EBO para o sol, bem
+  // como criamos o program
+  sun.create(m_model, assetsPath);
 
   // Carregamos os indices, vertices e montamos o VAO, VBO e EBO para as
   // boxes e colocamos na lista de boxes
@@ -121,6 +116,7 @@ void Window::onCreate() {
     box.create(m_model, m_program, assetsPath + "box.obj");
     boxes.emplace_back(box);
   }
+
   // Inicializamos as variáveis necessárias
   restart();
   // Get location of uniform variables
@@ -128,12 +124,6 @@ void Window::onCreate() {
   m_projMatrixLocation = abcg::glGetUniformLocation(m_program, "projMatrix");
   m_modelMatrixLocation = abcg::glGetUniformLocation(m_program, "modelMatrix");
   m_colorLocation = abcg::glGetUniformLocation(m_program, "color");
-
-  sunViewMatrixLocation = abcg::glGetUniformLocation(sunProgram, "viewMatrix");
-  sunProjMatrixLocation = abcg::glGetUniformLocation(sunProgram, "projMatrix");
-  sunModelMatrixLocation =
-      abcg::glGetUniformLocation(sunProgram, "modelMatrix");
-  sunColorLocation = abcg::glGetUniformLocation(sunProgram, "color");
 }
 
 bool Window::checkBoxValidPosition(Box newBox) {
@@ -213,10 +203,10 @@ void Window::onPaint() {
   // Desenho chão
   m_ground.paint();
 
-  // Desenho do sol
-  sun.paint(sunColorLocation, sunModelMatrixLocation, m_model);
-
   abcg::glUseProgram(0);
+
+  // Desenho do sol
+  sun.paint(m_camera.getViewMatrix(), m_camera.getProjMatrix(), m_model);
 }
 
 void Window::onPaintUI() {

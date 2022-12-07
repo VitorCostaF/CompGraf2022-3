@@ -14,6 +14,12 @@ public:
   GLuint m_VAO{};
   GLuint m_VBO{};
   GLuint m_EBO{};
+  GLuint sunProgram{};
+
+  GLint sunViewMatrixLocation{};
+  GLint sunProjMatrixLocation{};
+  GLint sunModelMatrixLocation{};
+  GLint sunColorLocation{};
 
   glm::vec3 sunPosition{-6.0f, 0.0f, -6.5f};
   glm::vec4 sunColor{1.0f, 1.0f, 0.0f, 1.0f};
@@ -25,8 +31,8 @@ public:
 
   void update(float deltaTime);
   void restart();
-  void create(Model m_model, GLuint m_program, const std::string assetsPath);
-  void paint(GLint colorLocation, GLint modelMatrixLocation, Model m_model);
+  void create(Model m_model, const std::string assetsPath);
+  void paint(glm::mat4 viewMatrix, glm::mat4 projMatrix, Model m_model);
 };
 
 #endif

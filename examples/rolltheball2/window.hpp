@@ -40,11 +40,6 @@ private:
   GLint m_modelMatrixLocation{};
   GLint m_colorLocation{};
 
-  GLint sunViewMatrixLocation{};
-  GLint sunProjMatrixLocation{};
-  GLint sunModelMatrixLocation{};
-  GLint sunColorLocation{};
-
   ImFont *m_font{};
 
   Camera m_camera;
