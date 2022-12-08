@@ -27,7 +27,7 @@ void Ball::create(Model m_model, const std::string assetsPath) {
   // ballColorLocation = abcg::glGetUniformLocation(ballProgram, "color");
 }
 
-void Ball::update(float deltaTime, glm::vec4 sunColor) {
+void Ball::update(float deltaTime, glm::vec4 sunColor, glm::vec3 sunPosition) {
   // Aqui atualizamos a posição da bolinha de acordo com verticalSpeed e
   // horizontalSpeed. Essas variáveis podem ser -1, 0 ou 1, dependendo da seta
   // que apertarmos. Usamos deltaTime para uma variação por segundo.
@@ -49,9 +49,24 @@ void Ball::update(float deltaTime, glm::vec4 sunColor) {
   // Abaixo atualizamos as propriedades de iluminação de acordo com a cor do sol
   // para tentar representar o brilho e a cor
 
-  // A ambiente é apenas uma fração da cor de fato do sol, pois não é a luz
-  // direta mas sim simula as reflexões do resto do ambiente
-  m_Ka = sunColor * 0.1f;
+  // Aqui alteramos a cor das luzes incidentes de acordo com a luz do sol.
+  // Mantemos as constantes k fixas, pois o objeto é o mesmo. Colocamos as luzes
+  // especular e difusa como sendo a luz do sol pois ela é a predominante e
+  // ficar com um efeito visual melhor dado que a luz do sol está do lado oposto
+  // da camera.
+  m_Ia = sunColor * 0.3f;
+  m_Is = sunColor;
+  m_Id = sunColor * 0.8f;
+
+  // A luz do sol ilumina todo o ambiente em todas as direções e como movemos a
+  // bolinha e também o sol se move calculamos a luz incidente do sol como se o
+  // sol estivesse "olhando" para a bolinha
+  sunLightDir = glm::vec4(ballPosition - sunPosition, 1);
+
+  // Aqui deixamos o brilho "maior" quando o sol está a pino. Isso por que a
+  // posição x do sol é zero nesse momento e no nascer e se por do sol o brilho
+  // é mais focalizado ou "menor".
+  m_shininess = abs(sunPosition.x);
 }
 
 void Ball::paint(glm::mat4 viewMatrix, glm::mat4 projMatrix, Model m_model) {
@@ -80,7 +95,7 @@ void Ball::paint(glm::mat4 viewMatrix, glm::mat4 projMatrix, Model m_model) {
   abcg::glUniformMatrix4fv(viewMatrixLoc, 1, GL_FALSE, &viewMatrix[0][0]);
   abcg::glUniformMatrix4fv(projMatrixLoc, 1, GL_FALSE, &projMatrix[0][0]);
 
-  abcg::glUniform4fv(lightDirLoc, 1, &m_lightDir.x);
+  abcg::glUniform4fv(lightDirLoc, 1, &sunLightDir.x);
   abcg::glUniform4fv(IaLoc, 1, &m_Ia.x);
   abcg::glUniform4fv(IdLoc, 1, &m_Id.x);
   abcg::glUniform4fv(IsLoc, 1, &m_Is.x);

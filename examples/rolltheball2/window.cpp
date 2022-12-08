@@ -313,7 +313,7 @@ void Window::onUpdate() {
   checkWallColision();
 
   // Atualizamos os parâmetros da bola.
-  ball.update(deltaTime, sun.sunColor);
+  ball.update(deltaTime, sun.sunColor, sun.sunPosition);
   // Acertamos o ponto que a câmera olha para que ela acompanhe a bola.
   m_camera.move(ball.ballPosition);
 
