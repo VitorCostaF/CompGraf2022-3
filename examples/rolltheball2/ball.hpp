@@ -33,6 +33,9 @@ public:
   glm::vec4 m_Kd{1.0f};
   glm::vec4 m_Ks{1.0f};
   float m_shininess{20.0f};
+  float kc{0.01f};
+  float kl{0.01f};
+  float kq{0.02f};
 
   std::vector<Vertex> m_vertices;
   std::vector<GLuint> m_indices;

@@ -7,12 +7,18 @@ uniform mat4 modelMatrix;
 uniform mat4 viewMatrix;
 uniform mat4 projMatrix;
 uniform mat3 normalMatrix;
+uniform float Kc;
+uniform float Kl;
+uniform float Kq;
 
 uniform vec4 lightDirWorldSpace;
 
 out vec3 fragV;
 out vec3 fragL;
 out vec3 fragN;
+out float kq;
+out float kl;
+out float kc;
 
 void main() {
   vec3 P = (viewMatrix * modelMatrix * vec4(inPosition, 1.0)).xyz;
@@ -22,6 +28,10 @@ void main() {
   fragL = L;
   fragV = -P;
   fragN = N;
+
+  kc = Kc;
+  kl = Kl;
+  kq = Kq;
 
   gl_Position = projMatrix * vec4(P, 1.0);
 }

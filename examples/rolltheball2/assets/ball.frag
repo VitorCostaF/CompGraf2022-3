@@ -5,6 +5,9 @@ precision mediump float;
 in vec3 fragN;
 in vec3 fragL;
 in vec3 fragV;
+in float kq;
+in float kl;
+in float kc;
 
 // Light properties
 uniform vec4 Ia, Id, Is;
@@ -34,13 +37,21 @@ vec4 Phong(vec3 N, vec3 L, vec3 V) {
 
   vec4 diffuseColor = Kd * Id * lambertian;
   vec4 specularColor = Ks * Is * specular;
-  vec4 ambientColor = Ka * Ia;
+  
 
-  return ambientColor + diffuseColor + specularColor;
+  return diffuseColor + specularColor;
 }
 
 void main() {
   vec4 color = Phong(fragN, fragL, fragV);
+
+  float d = distance(fragL, fragV);
+
+  vec4 ambientColor = Ka * Ia;
+
+  float Fatt = (1.0/(kc + kl*d + kq*pow(d,2.0)));
+
+  color = ambientColor + color * Fatt;
 
   if (gl_FrontFacing) {
     outColor = color;

@@ -74,6 +74,7 @@ void Ball::paint(glm::mat4 viewMatrix, glm::mat4 projMatrix, Model m_model) {
   // Ativação do program e bind das matrizes de projeção e view
   abcg::glUseProgram(ballProgram);
 
+  // Localização das matrizes
   auto const viewMatrixLoc{
       abcg::glGetUniformLocation(ballProgram, "viewMatrix")};
   auto const projMatrixLoc{
@@ -82,8 +83,11 @@ void Ball::paint(glm::mat4 viewMatrix, glm::mat4 projMatrix, Model m_model) {
       abcg::glGetUniformLocation(ballProgram, "modelMatrix")};
   auto const normalMatrixLoc{
       abcg::glGetUniformLocation(ballProgram, "normalMatrix")};
+  // Localização da direção da luz
   auto const lightDirLoc{
       abcg::glGetUniformLocation(ballProgram, "lightDirWorldSpace")};
+
+  // Localização das propriedades de iluminação
   auto const shininessLoc{abcg::glGetUniformLocation(ballProgram, "shininess")};
   auto const IaLoc{abcg::glGetUniformLocation(ballProgram, "Ia")};
   auto const IdLoc{abcg::glGetUniformLocation(ballProgram, "Id")};
@@ -92,6 +96,12 @@ void Ball::paint(glm::mat4 viewMatrix, glm::mat4 projMatrix, Model m_model) {
   auto const KdLoc{abcg::glGetUniformLocation(ballProgram, "Kd")};
   auto const KsLoc{abcg::glGetUniformLocation(ballProgram, "Ks")};
 
+  // Localização das propriedades de atenuação
+  auto const KcLoc{abcg::glGetUniformLocation(ballProgram, "Kc")};
+  auto const KlLoc{abcg::glGetUniformLocation(ballProgram, "Kl")};
+  auto const KqLoc{abcg::glGetUniformLocation(ballProgram, "Kq")};
+
+  // Bind das propriedades
   abcg::glUniformMatrix4fv(viewMatrixLoc, 1, GL_FALSE, &viewMatrix[0][0]);
   abcg::glUniformMatrix4fv(projMatrixLoc, 1, GL_FALSE, &projMatrix[0][0]);
 
@@ -99,6 +109,15 @@ void Ball::paint(glm::mat4 viewMatrix, glm::mat4 projMatrix, Model m_model) {
   abcg::glUniform4fv(IaLoc, 1, &m_Ia.x);
   abcg::glUniform4fv(IdLoc, 1, &m_Id.x);
   abcg::glUniform4fv(IsLoc, 1, &m_Is.x);
+
+  abcg::glUniform4fv(KaLoc, 1, &m_Ka.x);
+  abcg::glUniform4fv(KdLoc, 1, &m_Kd.x);
+  abcg::glUniform4fv(KsLoc, 1, &m_Ks.x);
+  abcg::glUniform1f(shininessLoc, m_shininess);
+
+  abcg::glUniform1f(KcLoc, kc);
+  abcg::glUniform1f(KlLoc, kl);
+  abcg::glUniform1f(KqLoc, kq);
 
   // Aqui transladamos a bola para sua posição e aplicamos a escala, bem como a
   // rodamos se pelo ângulo de rotação que depende de para onde estamos
@@ -113,11 +132,6 @@ void Ball::paint(glm::mat4 viewMatrix, glm::mat4 projMatrix, Model m_model) {
   // Vínculo da matriz e da cor bem como renderização dos pontos.
   abcg::glUniformMatrix4fv(modelMatrixLoc, 1, GL_FALSE, &model[0][0]);
   // abcg::glUniform4f(ballColorLocation, 1.0f, 1.0f, 1.0f, 1.0f);
-
-  abcg::glUniform4fv(KaLoc, 1, &m_Ka.x);
-  abcg::glUniform4fv(KdLoc, 1, &m_Kd.x);
-  abcg::glUniform4fv(KsLoc, 1, &m_Ks.x);
-  abcg::glUniform1f(shininessLoc, m_shininess);
 
   auto const modelViewMatrix{glm::mat3(viewMatrix * model)};
   auto const normalMatrix{glm::inverseTranspose(modelViewMatrix)};
