@@ -106,7 +106,7 @@ void Window::onCreate() {
   ball.create(m_model, assetsPath);
 
   // Carregamos os indices, vertices e montamos o VAO, VBO e EBO para a parede
-  wall.create(m_model, m_program, assetsPath + "rectangle.obj");
+  wall.create(m_model, assetsPath);
 
   // Carregamos os indices, vertices e montamos o VAO, VBO e EBO para o sol, bem
   // como criamos o program
@@ -196,8 +196,6 @@ void Window::onPaint() {
   // estamos usando uma escala para diminuir a bola senão ela ficaria do tamanho
   // da tela devido a normalização, função standardize() da classe model.
 
-  // Desenho das paredes
-  wall.paint(m_colorLocation, m_modelMatrixLocation, m_model);
   // Desenho das caixas
   for (int i = 0; i < (int)boxes.size(); i++) {
     Box box = boxes.at(i);
@@ -209,6 +207,9 @@ void Window::onPaint() {
   m_ground.paint();
 
   abcg::glUseProgram(0);
+
+  // Desenho das paredes
+  wall.paint(m_camera.getViewMatrix(), m_camera.getProjMatrix(), m_model);
 
   // Desenho da bolinha
   ball.paint(m_camera.getViewMatrix(), m_camera.getProjMatrix(), m_model);
