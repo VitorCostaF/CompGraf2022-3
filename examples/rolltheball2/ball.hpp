@@ -4,6 +4,8 @@
 #include "abcgOpenGL.hpp"
 
 #include "model.hpp"
+#include "moon.hpp"
+#include "sun.hpp"
 #include <glm/gtx/fast_trigonometry.hpp>
 
 class Ball {
@@ -26,16 +28,28 @@ public:
   glm::vec3 rotationAxis{1.0f, 0.0f, 0.0f};
 
   glm::vec4 sunLightDir{0.0f, -1.0f, 0.0f, 1.0f};
-  glm::vec4 m_Ia{1.0f};
-  glm::vec4 m_Id{1.0f};
-  glm::vec4 m_Is{1.0f};
-  glm::vec4 m_Ka{0.2f, 0.2f, 0.2f, 1.0f};
-  glm::vec4 m_Kd{1.0f};
-  glm::vec4 m_Ks{1.0f};
-  float m_shininess{20.0f};
-  float kc{0.01f};
-  float kl{0.01f};
-  float kq{0.02f};
+  glm::vec4 Ia{1.0f};
+  glm::vec4 Ka{0.2f, 0.2f, 0.2f, 1.0f};
+  glm::vec4 sunId{1.0f};
+  glm::vec4 sunIs{1.0f};
+  glm::vec4 sunKd{1.0f};
+  glm::vec4 sunKs{1.0f};
+  float sunShininess{20.0f};
+
+  glm::vec4 moonLightDir{0.0f, -1.0f, 0.0f, 1.0f};
+  glm::vec4 moonId{1.0f};
+  glm::vec4 moonIs{1.0f};
+  glm::vec4 moonKd{0.7f};
+  glm::vec4 moonKs{1.0f};
+  float moonShininess{10.0f};
+
+  float kcSun{0.01f};
+  float klSun{0.01f};
+  float kqSun{0.02f};
+
+  float kcMoon{0.05f};
+  float klMoon{0.04f};
+  float kqMoon{0.08f};
 
   std::vector<Vertex> m_vertices;
   std::vector<GLuint> m_indices;
@@ -46,7 +60,7 @@ public:
   float angle{};
   float angularSpeed{180.0f};
 
-  void update(float deltaTime, glm::vec4 sunColor, glm::vec3 sunPosition);
+  void update(float deltaTime, Sun sun, Moon moon);
   void create(Model m_model, const std::string assetsPath);
 
   void paint(glm::mat4 viewMatrix, glm::mat4 projMatrix, Model m_model);

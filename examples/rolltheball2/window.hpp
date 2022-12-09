@@ -9,10 +9,12 @@
 #include "gamedata.hpp"
 #include "ground.hpp"
 #include "model.hpp"
+#include "moon.hpp"
 #include "sun.hpp"
 #include "wall.hpp"
 #include <random>
 #include <vector>
+
 
 class Window : public abcg::OpenGLWindow {
 protected:
@@ -49,6 +51,7 @@ private:
   Ball ball;
   Wall wall;
   Sun sun;
+  Moon moon;
 
   std::vector<Box> boxes;
 

@@ -112,6 +112,10 @@ void Window::onCreate() {
   // como criamos o program
   sun.create(m_model, assetsPath);
 
+  // Carregamos os indices, vertices e montamos o VAO, VBO e EBO para a lua, bem
+  // como criamos o program
+  moon.create(m_model, assetsPath);
+
   // Carregamos os indices, vertices e montamos o VAO, VBO e EBO para as
   // boxes e colocamos na lista de boxes
   for (int i = 0; i < qtdBoxes; i++) {
@@ -211,6 +215,8 @@ void Window::onPaint() {
 
   // Desenho do sol
   sun.paint(m_camera.getViewMatrix(), m_camera.getProjMatrix(), m_model);
+
+  moon.paint(m_camera.getViewMatrix(), m_camera.getProjMatrix(), m_model);
 }
 
 void Window::onPaintUI() {
@@ -313,7 +319,7 @@ void Window::onUpdate() {
   checkWallColision();
 
   // Atualizamos os parâmetros da bola.
-  ball.update(deltaTime, sun.sunColor, sun.sunPosition);
+  ball.update(deltaTime, sun, moon);
   // Acertamos o ponto que a câmera olha para que ela acompanhe a bola.
   m_camera.move(ball.ballPosition);
 
@@ -350,6 +356,7 @@ void Window::onUpdate() {
   }
 
   sun.update(deltaTime);
+  moon.update(timeElapsed);
 }
 
 int Window::checkActiveBoxes() {

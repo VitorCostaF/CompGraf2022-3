@@ -27,7 +27,7 @@ void Ball::create(Model m_model, const std::string assetsPath) {
   // ballColorLocation = abcg::glGetUniformLocation(ballProgram, "color");
 }
 
-void Ball::update(float deltaTime, glm::vec4 sunColor, glm::vec3 sunPosition) {
+void Ball::update(float deltaTime, Sun sun, Moon moon) {
   // Aqui atualizamos a posição da bolinha de acordo com verticalSpeed e
   // horizontalSpeed. Essas variáveis podem ser -1, 0 ou 1, dependendo da seta
   // que apertarmos. Usamos deltaTime para uma variação por segundo.
@@ -54,19 +54,29 @@ void Ball::update(float deltaTime, glm::vec4 sunColor, glm::vec3 sunPosition) {
   // especular e difusa como sendo a luz do sol pois ela é a predominante e
   // ficar com um efeito visual melhor dado que a luz do sol está do lado oposto
   // da camera.
-  m_Ia = sunColor * 0.3f;
-  m_Is = sunColor;
-  m_Id = sunColor * 0.8f;
+  sunIs = sun.sunColor;
+  sunId = sun.sunColor * 0.8f;
+
+  moonIs = moon.moonColor * 0.5f;
+  moonId = moon.moonColor * 0.5f;
+
+  // A cor ambiente e atualizada com um fator da luz do sol e luz da lua. O sol
+  // tem uma luz mais forte por isso mais representativo para a luz ambiente.
+  Ia = sun.sunColor * 0.3f;
 
   // A luz do sol ilumina todo o ambiente em todas as direções e como movemos a
   // bolinha e também o sol se move calculamos a luz incidente do sol como se o
   // sol estivesse "olhando" para a bolinha
-  sunLightDir = glm::vec4(ballPosition - sunPosition, 1);
+  sunLightDir = glm::vec4(ballPosition - sun.sunPosition, 1);
+
+  // Usamos a mesma ideia da direção da luz do sol para a luz da lua
+  moonLightDir = glm::vec4(ballPosition - moon.moonPosition, 1);
 
   // Aqui deixamos o brilho "maior" quando o sol está a pino. Isso por que a
   // posição x do sol é zero nesse momento e no nascer e se por do sol o brilho
   // é mais focalizado ou "menor".
-  m_shininess = abs(sunPosition.x);
+  sunShininess = abs(sun.sunPosition.x);
+  moonShininess = moon.moonShininess;
 }
 
 void Ball::paint(glm::mat4 viewMatrix, glm::mat4 projMatrix, Model m_model) {
@@ -84,40 +94,71 @@ void Ball::paint(glm::mat4 viewMatrix, glm::mat4 projMatrix, Model m_model) {
   auto const normalMatrixLoc{
       abcg::glGetUniformLocation(ballProgram, "normalMatrix")};
   // Localização da direção da luz
-  auto const lightDirLoc{
-      abcg::glGetUniformLocation(ballProgram, "lightDirWorldSpace")};
+  auto const sunLightLoc{abcg::glGetUniformLocation(ballProgram, "sunLight")};
+  auto const moonLightLoc{abcg::glGetUniformLocation(ballProgram, "moonLight")};
 
-  // Localização das propriedades de iluminação
-  auto const shininessLoc{abcg::glGetUniformLocation(ballProgram, "shininess")};
+  // Localização das propriedades de iluminação do sol
+  auto const sunShininessLoc{
+      abcg::glGetUniformLocation(ballProgram, "sunShininess")};
   auto const IaLoc{abcg::glGetUniformLocation(ballProgram, "Ia")};
-  auto const IdLoc{abcg::glGetUniformLocation(ballProgram, "Id")};
-  auto const IsLoc{abcg::glGetUniformLocation(ballProgram, "Is")};
+  auto const sunIdLoc{abcg::glGetUniformLocation(ballProgram, "sunId")};
+  auto const sunIsLoc{abcg::glGetUniformLocation(ballProgram, "sunIs")};
   auto const KaLoc{abcg::glGetUniformLocation(ballProgram, "Ka")};
-  auto const KdLoc{abcg::glGetUniformLocation(ballProgram, "Kd")};
-  auto const KsLoc{abcg::glGetUniformLocation(ballProgram, "Ks")};
+  auto const sunKdLoc{abcg::glGetUniformLocation(ballProgram, "sunKd")};
+  auto const sunKsLoc{abcg::glGetUniformLocation(ballProgram, "sunKs")};
+
+  // Localização das propriedades de iluminação da lua
+  auto const moonShininessLoc{
+      abcg::glGetUniformLocation(ballProgram, "moonShininess")};
+  auto const moonIdLoc{abcg::glGetUniformLocation(ballProgram, "moonId")};
+  auto const moonIsLoc{abcg::glGetUniformLocation(ballProgram, "moonIs")};
+  auto const moonKdLoc{abcg::glGetUniformLocation(ballProgram, "moonKd")};
+  auto const moonKsLoc{abcg::glGetUniformLocation(ballProgram, "moonKs")};
 
   // Localização das propriedades de atenuação
-  auto const KcLoc{abcg::glGetUniformLocation(ballProgram, "Kc")};
-  auto const KlLoc{abcg::glGetUniformLocation(ballProgram, "Kl")};
-  auto const KqLoc{abcg::glGetUniformLocation(ballProgram, "Kq")};
+  auto const KcSunLoc{abcg::glGetUniformLocation(ballProgram, "KcSun")};
+  auto const KlSunLoc{abcg::glGetUniformLocation(ballProgram, "KlSun")};
+  auto const KqSunLoc{abcg::glGetUniformLocation(ballProgram, "KqSun")};
+
+  // Localização das propriedades de atenuação
+  auto const KcMoonLoc{abcg::glGetUniformLocation(ballProgram, "KcMoon")};
+  auto const KlMoonLoc{abcg::glGetUniformLocation(ballProgram, "KlMoon")};
+  auto const KqMoonLoc{abcg::glGetUniformLocation(ballProgram, "KqMoon")};
 
   // Bind das propriedades
   abcg::glUniformMatrix4fv(viewMatrixLoc, 1, GL_FALSE, &viewMatrix[0][0]);
   abcg::glUniformMatrix4fv(projMatrixLoc, 1, GL_FALSE, &projMatrix[0][0]);
 
-  abcg::glUniform4fv(lightDirLoc, 1, &sunLightDir.x);
-  abcg::glUniform4fv(IaLoc, 1, &m_Ia.x);
-  abcg::glUniform4fv(IdLoc, 1, &m_Id.x);
-  abcg::glUniform4fv(IsLoc, 1, &m_Is.x);
+  abcg::glUniform4fv(IaLoc, 1, &Ia.x);
+  abcg::glUniform4fv(KaLoc, 1, &Ka.x);
 
-  abcg::glUniform4fv(KaLoc, 1, &m_Ka.x);
-  abcg::glUniform4fv(KdLoc, 1, &m_Kd.x);
-  abcg::glUniform4fv(KsLoc, 1, &m_Ks.x);
-  abcg::glUniform1f(shininessLoc, m_shininess);
+  // Propriedades do sol
+  abcg::glUniform4fv(sunLightLoc, 1, &sunLightDir.x);
+  abcg::glUniform4fv(sunIdLoc, 1, &sunId.x);
+  abcg::glUniform4fv(sunIsLoc, 1, &sunIs.x);
 
-  abcg::glUniform1f(KcLoc, kc);
-  abcg::glUniform1f(KlLoc, kl);
-  abcg::glUniform1f(KqLoc, kq);
+  abcg::glUniform4fv(sunKdLoc, 1, &sunKd.x);
+  abcg::glUniform4fv(sunKsLoc, 1, &sunKs.x);
+  abcg::glUniform1f(sunShininessLoc, sunShininess);
+
+  // Propriedades da lua
+  abcg::glUniform4fv(moonLightLoc, 1, &moonLightDir.x);
+  abcg::glUniform4fv(moonIdLoc, 1, &moonId.x);
+  abcg::glUniform4fv(moonIsLoc, 1, &moonIs.x);
+
+  abcg::glUniform4fv(moonKdLoc, 1, &moonKd.x);
+  abcg::glUniform4fv(moonKsLoc, 1, &moonKs.x);
+  abcg::glUniform1f(moonShininessLoc, moonShininess);
+
+  // Propriedades de distância sol
+  abcg::glUniform1f(KcSunLoc, kcSun);
+  abcg::glUniform1f(KlSunLoc, klSun);
+  abcg::glUniform1f(KqSunLoc, kqSun);
+
+  // Propriedades de distância lua
+  abcg::glUniform1f(KcMoonLoc, kcMoon);
+  abcg::glUniform1f(KlMoonLoc, klMoon);
+  abcg::glUniform1f(KqMoonLoc, kqMoon);
 
   // Aqui transladamos a bola para sua posição e aplicamos a escala, bem como a
   // rodamos se pelo ângulo de rotação que depende de para onde estamos
