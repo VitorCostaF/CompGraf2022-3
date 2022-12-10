@@ -41,6 +41,7 @@ public:
   void create(Model m_model, const std::string assetsPath);
   void paint(glm::mat4 viewMatrix, glm::mat4 projMatrix, Model m_model);
   void update(glm::vec4 lightColorParam, glm::vec3 LightPosParam);
+  void destroy();
 };
 
 #endif

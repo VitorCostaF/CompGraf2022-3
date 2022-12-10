@@ -27,7 +27,11 @@ void Moon::create(Model m_model, const std::string assetsPath) {
   moonColorLocation = abcg::glGetUniformLocation(moonProgram, "color");
 }
 
-void Moon::update(float elapsedTime) { moonShininess = 22 - elapsedTime; }
+void Moon::update(float elapsedTime) {
+  // Diminuimos o shininess conforme o tempo passa para abrir mais o brilha da
+  // luz da lua
+  moonShininess = 22 - elapsedTime;
+}
 
 void Moon::paint(glm::mat4 viewMatrix, glm::mat4 projMatrix, Model m_model) {
 

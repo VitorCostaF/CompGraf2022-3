@@ -68,6 +68,7 @@ void Sun::update(float deltaTime) {
 }
 
 void Sun::restart() {
+  // restart da posição e cor do sol para amarelo
   sunPosition = glm::vec3{-8.66f, 0.0f, -7.0f};
   sunColor = glm::vec4{1.0f, 01.0f, 0.0f, 1.0f};
 }

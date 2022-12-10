@@ -98,9 +98,6 @@ void Window::onCreate() {
        {.source = assetsPath + "main.frag",
         .stage = abcg::ShaderStage::Fragment}});
 
-  // Inicializamos os buffers para o chão
-  m_ground.create(m_program);
-
   // Carregamos os indices, vertices e montamos o VAO, VBO e EBO para a bola,
   // bem como criamos o program
   ball.create(m_model, assetsPath);
@@ -115,6 +112,10 @@ void Window::onCreate() {
   // Carregamos os indices, vertices e montamos o VAO, VBO e EBO para a lua, bem
   // como criamos o program
   moon.create(m_model, assetsPath);
+
+  // Carregamos os indices, vertices e montamos o VAO, VBO e EBO para o chão,
+  // bem como criamos o program
+  m_ground.create(m_model, assetsPath);
 
   // Carregamos os indices, vertices e montamos o VAO, VBO e EBO para as
   // boxes e colocamos na lista de boxes
@@ -203,8 +204,6 @@ void Window::onPaint() {
       box.paint(m_colorLocation, m_modelMatrixLocation, m_model);
     }
   }
-  // Desenho chão
-  m_ground.paint();
 
   abcg::glUseProgram(0);
 
@@ -218,6 +217,9 @@ void Window::onPaint() {
   sun.paint(m_camera.getViewMatrix(), m_camera.getProjMatrix(), m_model);
 
   moon.paint(m_camera.getViewMatrix(), m_camera.getProjMatrix(), m_model);
+
+  // Desenho chão
+  m_ground.paint(m_camera.getViewMatrix(), m_camera.getProjMatrix(), m_model);
 }
 
 void Window::onPaintUI() {
@@ -294,7 +296,7 @@ void Window::restart() {
       i++;
     }
   }
-
+  // restart da posição e cor do sol
   sun.restart();
 }
 
@@ -302,6 +304,7 @@ void Window::onDestroy() {
   // Liberação dos recursos
   m_ground.destroy();
   sun.destroy();
+  wall.destroy();
   abcg::glDeleteProgram(m_program);
   abcg::glDeleteBuffers(1, &m_EBO);
   abcg::glDeleteBuffers(1, &m_VBO);
@@ -358,7 +361,11 @@ void Window::onUpdate() {
 
   sun.update(deltaTime);
   moon.update(timeElapsed);
+  // Passamos a cor do sol e sua posição para dar as coordenadas da fonte de luz
+  // mais forte, que é o sol
   wall.update(sun.sunColor, sun.sunPosition);
+
+  m_ground.update(sun.sunColor, sun.sunPosition);
 }
 
 int Window::checkActiveBoxes() {

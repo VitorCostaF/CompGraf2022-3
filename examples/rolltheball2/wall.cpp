@@ -26,6 +26,7 @@ void Wall::create(Model m_model, const std::string assetsPath) {
 }
 
 void Wall::update(glm::vec4 lightColorParam, glm::vec3 LightPosParam) {
+  // Acertamos a luz especular, "brilho", com a cor da luz incidente
   lightPos = glm::vec4(LightPosParam, 0);
   Is = lightColorParam;
 }
@@ -129,4 +130,11 @@ void Wall::paint(glm::mat4 viewMatrix, glm::mat4 projMatrix, Model m_model) {
   // Renderização feita pela classe Model
   m_model.renderTexture(&m_indices, &m_VAO, diffuseTexture);
   abcg::glUseProgram(0);
+}
+
+void Wall::destroy() {
+  abcg::glDeleteProgram(wallProgram);
+  abcg::glDeleteBuffers(1, &m_EBO);
+  abcg::glDeleteBuffers(1, &m_VBO);
+  abcg::glDeleteVertexArrays(1, &m_VAO);
 }
