@@ -29,6 +29,7 @@ void Wall::update(glm::vec4 lightColorParam, glm::vec3 LightPosParam) {
   // Acertamos a luz especular, "brilho", com a cor da luz incidente
   lightPos = glm::vec4(LightPosParam, 0);
   Is = lightColorParam;
+  shininess = 2 * abs(LightPosParam.x);
 }
 
 void Wall::paint(glm::mat4 viewMatrix, glm::mat4 projMatrix, Model m_model) {
