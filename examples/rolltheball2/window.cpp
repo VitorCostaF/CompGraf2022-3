@@ -209,7 +209,8 @@ void Window::onPaint() {
   abcg::glUseProgram(0);
 
   // Desenho das paredes
-  wall.paint(m_camera.getViewMatrix(), m_camera.getProjMatrix(), m_model);
+  wall.paint(m_camera.getViewMatrix(), m_camera.getProjMatrix(), m_model,
+             sun.sunPosition);
 
   // Desenho da bolinha
   ball.paint(m_camera.getViewMatrix(), m_camera.getProjMatrix(), m_model);

@@ -16,12 +16,14 @@ public:
   GLuint m_EBO{};
   GLuint wallProgram{};
 
+  GLuint diffuseTexture{};
+
   GLint wallViewMatrixLocation{};
   GLint wallProjMatrixLocation{};
   GLint wallModelMatrixLocation{};
   GLint wallColorLocation{};
 
-  glm::vec4 lightDir{0.0f, -1.0f, 0.0f, 1.0f};
+  glm::vec4 lightDir{0.0f, 1.0f, 0.0f, 1.0f};
   glm::vec4 Ia{1.0f};
   glm::vec4 Ka{0.2f, 0.2f, 0.2f, 1.0f};
   glm::vec4 Id{1.0f};
@@ -36,7 +38,8 @@ public:
   std::vector<GLuint> m_indices;
 
   void create(Model m_model, const std::string assetsPath);
-  void paint(glm::mat4 viewMatrix, glm::mat4 projMatrix, Model m_model);
+  void paint(glm::mat4 viewMatrix, glm::mat4 projMatrix, Model m_model,
+             glm::vec3 sunLightDir);
 };
 
 #endif

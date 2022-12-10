@@ -20,9 +20,12 @@ void Wall::create(Model m_model, const std::string assetsPath) {
       abcg::glGetUniformLocation(wallProgram, "projMatrix");
 
   wallColorLocation = abcg::glGetUniformLocation(wallProgram, "color");
+
+  m_model.loadDiffuseTexture(assetsPath + "wall.png", &diffuseTexture);
 }
 
-void Wall::paint(glm::mat4 viewMatrix, glm::mat4 projMatrix, Model m_model) {
+void Wall::paint(glm::mat4 viewMatrix, glm::mat4 projMatrix, Model m_model,
+                 glm::vec3 sunLightDir) {
 
   abcg::glUseProgram(wallProgram);
 
@@ -52,14 +55,12 @@ void Wall::paint(glm::mat4 viewMatrix, glm::mat4 projMatrix, Model m_model) {
   abcg::glUniformMatrix4fv(viewMatrixLoc, 1, GL_FALSE, &viewMatrix[0][0]);
   abcg::glUniformMatrix4fv(projMatrixLoc, 1, GL_FALSE, &projMatrix[0][0]);
 
+  // Propriedades da luz
+  abcg::glUniform4fv(lightLoc, 1, &sunLightDir.x);
   abcg::glUniform4fv(IaLoc, 1, &Ia.x);
-  abcg::glUniform4fv(KaLoc, 1, &Ka.x);
-
-  // Propriedades do sol
-  abcg::glUniform4fv(lightLoc, 1, &lightDir.x);
   abcg::glUniform4fv(IdLoc, 1, &Id.x);
   abcg::glUniform4fv(IsLoc, 1, &Is.x);
-
+  abcg::glUniform4fv(KaLoc, 1, &Ka.x);
   abcg::glUniform4fv(KdLoc, 1, &Kd.x);
   abcg::glUniform4fv(KsLoc, 1, &Ks.x);
   abcg::glUniform1f(shininessLoc, shininess);
@@ -76,7 +77,7 @@ void Wall::paint(glm::mat4 viewMatrix, glm::mat4 projMatrix, Model m_model) {
   abcg::glUniformMatrix4fv(modelMatrixLoc, 1, GL_FALSE, &model[0][0]);
   abcg::glUniform4f(wallColorLocation, 1.0f, 0.8f, 0.0f, 1.0f);
 
-  m_model.render(&m_indices, &m_VAO);
+  m_model.renderTexture(&m_indices, &m_VAO, diffuseTexture);
 
   // Desenho da parede norte. A posição z tem a mesma lógica da anterior, porém
   // refletida em relação a origem
@@ -90,7 +91,7 @@ void Wall::paint(glm::mat4 viewMatrix, glm::mat4 projMatrix, Model m_model) {
   abcg::glUniformMatrix4fv(modelMatrixLoc, 1, GL_FALSE, &model[0][0]);
   abcg::glUniform4f(wallColorLocation, 1.0f, 0.8f, 0.0f, 1.0f);
 
-  m_model.render(&m_indices, &m_VAO);
+  m_model.renderTexture(&m_indices, &m_VAO, diffuseTexture);
 
   // Desenho da parede leste. A lógica da coordenada z das paredes anteriores
   // foi aplicada na coordenada x dessa parede e também rodamos em -90.0 graus
@@ -106,7 +107,7 @@ void Wall::paint(glm::mat4 viewMatrix, glm::mat4 projMatrix, Model m_model) {
   abcg::glUniformMatrix4fv(modelMatrixLoc, 1, GL_FALSE, &model[0][0]);
   abcg::glUniform4f(wallColorLocation, 1.0f, 0.8f, 0.0f, 1.0f);
 
-  m_model.render(&m_indices, &m_VAO);
+  m_model.renderTexture(&m_indices, &m_VAO, diffuseTexture);
 
   // Desenho da parede oeste. Mesma lógica da parede anterior para a coordenada
   // x, porém refletida pela origem.
@@ -122,6 +123,6 @@ void Wall::paint(glm::mat4 viewMatrix, glm::mat4 projMatrix, Model m_model) {
   abcg::glUniform4f(wallColorLocation, 1.0f, 0.8f, 0.0f, 1.0f);
 
   // Renderização feita pela classe Model
-  m_model.render(&m_indices, &m_VAO);
+  m_model.renderTexture(&m_indices, &m_VAO, diffuseTexture);
   abcg::glUseProgram(0);
 }

@@ -1,5 +1,6 @@
 #include "model.hpp"
 
+#include <filesystem>
 #include <unordered_map>
 
 // Explicit specialization of std::hash for Vertex
@@ -129,6 +130,37 @@ void Model::render(std::vector<GLuint> *m_indices, GLuint *m_VAO,
   abcg::glDrawElements(GL_TRIANGLES, numIndices, GL_UNSIGNED_INT, nullptr);
 
   abcg::glBindVertexArray(0);
+}
+
+void Model::renderTexture(std::vector<GLuint> *m_indices, GLuint *m_VAO,
+                          GLuint diffuseTexture, int numTriangles) const {
+  abcg::glBindVertexArray(*m_VAO);
+
+  abcg::glActiveTexture(GL_TEXTURE0);
+  abcg::glBindTexture(GL_TEXTURE_2D, diffuseTexture);
+
+  // Set minification and magnification parameters
+  abcg::glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  abcg::glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+  // Set texture wrapping parameters
+  abcg::glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+  abcg::glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+  auto const numIndices{(numTriangles < 0) ? (*m_indices).size()
+                                           : numTriangles * 3};
+
+  abcg::glDrawElements(GL_TRIANGLES, numIndices, GL_UNSIGNED_INT, nullptr);
+
+  abcg::glBindVertexArray(0);
+}
+
+void Model::loadDiffuseTexture(std::string_view path, GLuint *diffuseTexture) {
+  if (!std::filesystem::exists(path))
+    return;
+
+  abcg::glDeleteTextures(1, diffuseTexture);
+  *diffuseTexture = abcg::loadOpenGLTexture({.path = path});
 }
 
 void Model::setupVAO(GLuint program, GLuint *m_VBO, GLuint *m_EBO,
