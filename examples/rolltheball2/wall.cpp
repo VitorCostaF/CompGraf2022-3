@@ -1,4 +1,5 @@
 #include "wall.hpp"
+#include <glm/fwd.hpp>
 
 void Wall::create(Model m_model, const std::string assetsPath) {
 
@@ -24,8 +25,12 @@ void Wall::create(Model m_model, const std::string assetsPath) {
   m_model.loadDiffuseTexture(assetsPath + "wall.png", &diffuseTexture);
 }
 
-void Wall::paint(glm::mat4 viewMatrix, glm::mat4 projMatrix, Model m_model,
-                 glm::vec3 sunLightDir) {
+void Wall::update(glm::vec4 lightColorParam, glm::vec3 LightPosParam) {
+  lightPos = glm::vec4(LightPosParam, 0);
+  Is = lightColorParam;
+}
+
+void Wall::paint(glm::mat4 viewMatrix, glm::mat4 projMatrix, Model m_model) {
 
   abcg::glUseProgram(wallProgram);
 
@@ -39,8 +44,7 @@ void Wall::paint(glm::mat4 viewMatrix, glm::mat4 projMatrix, Model m_model,
   auto const normalMatrixLoc{
       abcg::glGetUniformLocation(wallProgram, "normalMatrix")};
 
-  auto const lightLoc{
-      abcg::glGetUniformLocation(wallProgram, "lightDirWorldSpace")};
+  auto const lightLoc{abcg::glGetUniformLocation(wallProgram, "lightPos")};
 
   // Localização das propriedades de iluminação do sol
   auto const shininessLoc{abcg::glGetUniformLocation(wallProgram, "shininess")};
@@ -56,7 +60,7 @@ void Wall::paint(glm::mat4 viewMatrix, glm::mat4 projMatrix, Model m_model,
   abcg::glUniformMatrix4fv(projMatrixLoc, 1, GL_FALSE, &projMatrix[0][0]);
 
   // Propriedades da luz
-  abcg::glUniform4fv(lightLoc, 1, &sunLightDir.x);
+  abcg::glUniform4fv(lightLoc, 1, &lightPos.x);
   abcg::glUniform4fv(IaLoc, 1, &Ia.x);
   abcg::glUniform4fv(IdLoc, 1, &Id.x);
   abcg::glUniform4fv(IsLoc, 1, &Is.x);

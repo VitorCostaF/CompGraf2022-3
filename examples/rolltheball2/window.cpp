@@ -209,8 +209,7 @@ void Window::onPaint() {
   abcg::glUseProgram(0);
 
   // Desenho das paredes
-  wall.paint(m_camera.getViewMatrix(), m_camera.getProjMatrix(), m_model,
-             sun.sunPosition);
+  wall.paint(m_camera.getViewMatrix(), m_camera.getProjMatrix(), m_model);
 
   // Desenho da bolinha
   ball.paint(m_camera.getViewMatrix(), m_camera.getProjMatrix(), m_model);
@@ -359,6 +358,7 @@ void Window::onUpdate() {
 
   sun.update(deltaTime);
   moon.update(timeElapsed);
+  wall.update(sun.sunColor, sun.sunPosition);
 }
 
 int Window::checkActiveBoxes() {
