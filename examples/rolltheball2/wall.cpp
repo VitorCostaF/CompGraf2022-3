@@ -18,8 +18,6 @@ void Wall::create(Model m_model, const std::string assetsPath) {
       abcg::glGetUniformLocation(wallProgram, "viewMatrix");
   wallProjMatrixLocation =
       abcg::glGetUniformLocation(wallProgram, "projMatrix");
-  wallModelMatrixLocation =
-      abcg::glGetUniformLocation(wallProgram, "modelMatrix");
 
   wallColorLocation = abcg::glGetUniformLocation(wallProgram, "color");
 }
@@ -28,18 +26,54 @@ void Wall::paint(glm::mat4 viewMatrix, glm::mat4 projMatrix, Model m_model) {
 
   abcg::glUseProgram(wallProgram);
 
+  // Localização das matrizes
+  auto const viewMatrixLoc{
+      abcg::glGetUniformLocation(wallProgram, "viewMatrix")};
+  auto const projMatrixLoc{
+      abcg::glGetUniformLocation(wallProgram, "projMatrix")};
+  auto const modelMatrixLoc{
+      abcg::glGetUniformLocation(wallProgram, "modelMatrix")};
+  auto const normalMatrixLoc{
+      abcg::glGetUniformLocation(wallProgram, "normalMatrix")};
+
+  auto const lightLoc{
+      abcg::glGetUniformLocation(wallProgram, "lightDirWorldSpace")};
+
+  // Localização das propriedades de iluminação do sol
+  auto const shininessLoc{abcg::glGetUniformLocation(wallProgram, "shininess")};
+  auto const IaLoc{abcg::glGetUniformLocation(wallProgram, "Ia")};
+  auto const IdLoc{abcg::glGetUniformLocation(wallProgram, "Id")};
+  auto const IsLoc{abcg::glGetUniformLocation(wallProgram, "Is")};
+  auto const KaLoc{abcg::glGetUniformLocation(wallProgram, "Ka")};
+  auto const KdLoc{abcg::glGetUniformLocation(wallProgram, "Kd")};
+  auto const KsLoc{abcg::glGetUniformLocation(wallProgram, "Ks")};
+
   // Bind das propriedades
-  abcg::glUniformMatrix4fv(wallViewMatrixLocation, 1, GL_FALSE,
-                           &viewMatrix[0][0]);
-  abcg::glUniformMatrix4fv(wallProjMatrixLocation, 1, GL_FALSE,
-                           &projMatrix[0][0]);
+  abcg::glUniformMatrix4fv(viewMatrixLoc, 1, GL_FALSE, &viewMatrix[0][0]);
+  abcg::glUniformMatrix4fv(projMatrixLoc, 1, GL_FALSE, &projMatrix[0][0]);
+
+  abcg::glUniform4fv(IaLoc, 1, &Ia.x);
+  abcg::glUniform4fv(KaLoc, 1, &Ka.x);
+
+  // Propriedades do sol
+  abcg::glUniform4fv(lightLoc, 1, &lightDir.x);
+  abcg::glUniform4fv(IdLoc, 1, &Id.x);
+  abcg::glUniform4fv(IsLoc, 1, &Is.x);
+
+  abcg::glUniform4fv(KdLoc, 1, &Kd.x);
+  abcg::glUniform4fv(KsLoc, 1, &Ks.x);
+  abcg::glUniform1f(shininessLoc, shininess);
 
   // Desenho da parede sul. Notemos que a posição foi escolhida para alinhamento
   // dos cantos (encontro das paredes)
   glm::mat4 model{1.0f};
   model = glm::translate(model, glm::vec3{0.0f, 0.2f, 0.96f});
 
-  abcg::glUniformMatrix4fv(wallModelMatrixLocation, 1, GL_FALSE, &model[0][0]);
+  auto modelViewMatrix{glm::mat3(viewMatrix * model)};
+  auto normalMatrix{glm::inverseTranspose(modelViewMatrix)};
+  abcg::glUniformMatrix3fv(normalMatrixLoc, 1, GL_FALSE, &normalMatrix[0][0]);
+
+  abcg::glUniformMatrix4fv(modelMatrixLoc, 1, GL_FALSE, &model[0][0]);
   abcg::glUniform4f(wallColorLocation, 1.0f, 0.8f, 0.0f, 1.0f);
 
   m_model.render(&m_indices, &m_VAO);
@@ -49,7 +83,11 @@ void Wall::paint(glm::mat4 viewMatrix, glm::mat4 projMatrix, Model m_model) {
   model = glm::mat4(1.0);
   model = glm::translate(model, glm::vec3{0.0f, 0.2f, -0.96f});
 
-  abcg::glUniformMatrix4fv(wallModelMatrixLocation, 1, GL_FALSE, &model[0][0]);
+  modelViewMatrix = glm::mat3(viewMatrix * model);
+  normalMatrix = glm::inverseTranspose(modelViewMatrix);
+  abcg::glUniformMatrix3fv(normalMatrixLoc, 1, GL_FALSE, &normalMatrix[0][0]);
+
+  abcg::glUniformMatrix4fv(modelMatrixLoc, 1, GL_FALSE, &model[0][0]);
   abcg::glUniform4f(wallColorLocation, 1.0f, 0.8f, 0.0f, 1.0f);
 
   m_model.render(&m_indices, &m_VAO);
@@ -61,7 +99,11 @@ void Wall::paint(glm::mat4 viewMatrix, glm::mat4 projMatrix, Model m_model) {
   model = glm::translate(model, glm::vec3{0.96f, 0.2f, 0.0f});
   model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(0, 1, 0));
 
-  abcg::glUniformMatrix4fv(wallModelMatrixLocation, 1, GL_FALSE, &model[0][0]);
+  modelViewMatrix = glm::mat3(viewMatrix * model);
+  normalMatrix = glm::inverseTranspose(modelViewMatrix);
+  abcg::glUniformMatrix3fv(normalMatrixLoc, 1, GL_FALSE, &normalMatrix[0][0]);
+
+  abcg::glUniformMatrix4fv(modelMatrixLoc, 1, GL_FALSE, &model[0][0]);
   abcg::glUniform4f(wallColorLocation, 1.0f, 0.8f, 0.0f, 1.0f);
 
   m_model.render(&m_indices, &m_VAO);
@@ -72,7 +114,11 @@ void Wall::paint(glm::mat4 viewMatrix, glm::mat4 projMatrix, Model m_model) {
   model = glm::translate(model, glm::vec3{-0.96f, 0.2f, 0.0f});
   model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(0, 1, 0));
 
-  abcg::glUniformMatrix4fv(wallModelMatrixLocation, 1, GL_FALSE, &model[0][0]);
+  modelViewMatrix = glm::mat3(viewMatrix * model);
+  normalMatrix = glm::inverseTranspose(modelViewMatrix);
+  abcg::glUniformMatrix3fv(normalMatrixLoc, 1, GL_FALSE, &normalMatrix[0][0]);
+
+  abcg::glUniformMatrix4fv(modelMatrixLoc, 1, GL_FALSE, &model[0][0]);
   abcg::glUniform4f(wallColorLocation, 1.0f, 0.8f, 0.0f, 1.0f);
 
   // Renderização feita pela classe Model

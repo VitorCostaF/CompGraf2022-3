@@ -21,6 +21,15 @@ public:
   GLint wallModelMatrixLocation{};
   GLint wallColorLocation{};
 
+  glm::vec4 lightDir{0.0f, -1.0f, 0.0f, 1.0f};
+  glm::vec4 Ia{1.0f};
+  glm::vec4 Ka{0.2f, 0.2f, 0.2f, 1.0f};
+  glm::vec4 Id{1.0f};
+  glm::vec4 Is{1.0f};
+  glm::vec4 Kd{1.0f};
+  glm::vec4 Ks{1.0f};
+  float shininess{20.0f};
+
   glm::vec3 wallPosition{0.0f, 0.2f, 1.0f};
 
   std::vector<Vertex> m_vertices;
